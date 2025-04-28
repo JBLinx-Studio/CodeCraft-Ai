@@ -46,6 +46,26 @@ const TEMPLATES = {
   },
 };
 
+// Define types for API responses to fix TypeScript errors
+interface AIServiceSuccessResponse {
+  success: true;
+  data: {
+    code: {
+      html?: string;
+      css?: string;
+      js?: string;
+    };
+    explanation?: string;
+  };
+}
+
+interface AIServiceErrorResponse {
+  success: false;
+  error: string;
+}
+
+type AIServiceResponse = AIServiceSuccessResponse | AIServiceErrorResponse;
+
 export function useAI() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
@@ -92,7 +112,8 @@ export function useAI() {
         
         if (response.success) {
           // Add assistant response to chat history
-          addToChatHistory({role: "assistant", content: response.explanation || "Code generated successfully"});
+          const explanation = response.data.explanation || "Code generated successfully";
+          addToChatHistory({role: "assistant", content: explanation});
           return response.data;
         } else {
           // If API call fails, log the error and fall back
@@ -109,7 +130,10 @@ export function useAI() {
       const smartFallbackResponse = await smartFallbackGenerator(prompt, chatHistory);
       
       // Add fallback response to chat history
-      addToChatHistory({role: "assistant", content: smartFallbackResponse.explanation || "Generated based on your request"});
+      addToChatHistory({
+        role: "assistant", 
+        content: smartFallbackResponse.explanation || "Generated based on your request"
+      });
       
       return smartFallbackResponse;
     } catch (error) {
@@ -121,7 +145,10 @@ export function useAI() {
       });
       
       const fallbackResponse = await smartFallbackGenerator(prompt, chatHistory);
-      addToChatHistory({role: "assistant", content: fallbackResponse.explanation || "Generated with fallback mode"});
+      addToChatHistory({
+        role: "assistant", 
+        content: fallbackResponse.explanation || "Generated with fallback mode"
+      });
       return fallbackResponse;
     } finally {
       setIsProcessing(false);
@@ -133,7 +160,7 @@ export function useAI() {
     prompt: string, 
     key: string, 
     provider: "OPENAI" | "HUGGINGFACE"
-  ) => {
+  ): Promise<AIServiceResponse> => {
     try {
       // Create an enhanced prompt for better code generation
       const enhancedPrompt = createEnhancedPrompt(prompt, chatHistory, provider);
@@ -288,7 +315,7 @@ Generate clean, modern, responsive code using best practices. Include comments w
   };
 
   // Parse responses from different AI providers
-  const parseOpenAIResponse = (data: any) => {
+  const parseOpenAIResponse = (data: any): AIServiceResponse => {
     try {
       const content = data.choices[0]?.message?.content || "";
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -314,7 +341,7 @@ Generate clean, modern, responsive code using best practices. Include comments w
     }
   };
 
-  const parseHuggingFaceResponse = (data: any) => {
+  const parseHuggingFaceResponse = (data: any): AIServiceResponse => {
     try {
       // Try to find and parse JSON from the response
       const jsonMatch = data.generated_text?.match(/\{[\s\S]*\}/);
@@ -902,7 +929,6 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   
   // Similarly define other template generators like generatePortfolioPage(), generateBlogPage(), etc.
-  // For brevity, we'll just implement the basic function declarations
   const generatePortfolioPage = (colors: any, features: any) => {
     // Similar implementation as generateLandingPage but for portfolio sites
     return {
