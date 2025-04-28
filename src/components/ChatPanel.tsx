@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useAI } from "@/hooks/use-ai";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ChatPanelProps {
   onCodeGenerated: (html: string, css: string, js: string) => void;
@@ -24,6 +25,7 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
   ]);
   
   const { generateCode, isProcessing } = useAI();
+  const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const addMessage = (role: "user" | "assistant", content: string) => {
@@ -44,6 +46,11 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
       
       if (response.error) {
         addMessage("assistant", `I encountered an error: ${response.error}. Please try again with a different request.`);
+        toast({
+          title: "Error",
+          description: response.error,
+          variant: "destructive",
+        });
         return;
       }
       
@@ -59,6 +66,11 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
     } catch (error) {
       console.error("Error generating code:", error);
       addMessage("assistant", "I'm having trouble generating code right now. Please try again later.");
+      toast({
+        title: "Error",
+        description: "Failed to generate code. Using fallback mode.",
+        variant: "destructive",
+      });
     }
   };
 
