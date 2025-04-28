@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useAI } from "@/hooks/use-ai";
 import { useToast } from "@/components/ui/use-toast";
+import AISettings from "./AISettings";
+import { Settings } from "lucide-react";
 
 interface ChatPanelProps {
   onCodeGenerated: (html: string, css: string, js: string) => void;
@@ -24,7 +26,8 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
     },
   ]);
   
-  const { generateCode, isProcessing } = useAI();
+  const [showSettings, setShowSettings] = useState(false);
+  const { generateCode, isProcessing, apiKey, saveApiKey, clearApiKey, apiProvider } = useAI();
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -91,24 +94,51 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
     ]);
   };
 
+  const toggleSettings = () => {
+    setShowSettings(!showSettings);
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center px-4 py-2">
         <h2 className="text-lg font-medium">Chat</h2>
-        <Button variant="ghost" size="sm" onClick={clearChat}>
-          Clear
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={toggleSettings}
+            title="AI Settings"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={clearChat}>
+            Clear
+          </Button>
+        </div>
       </div>
       <Separator />
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-        {messages.map((message) => (
-          <ChatMessage key={message.id} message={message} />
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
-      <div className="p-4 border-t">
-        <ChatInput onSendMessage={handleSendMessage} isProcessing={isProcessing} />
-      </div>
+      
+      {showSettings ? (
+        <AISettings 
+          apiKey={apiKey}
+          apiProvider={apiProvider}
+          onSave={saveApiKey}
+          onClear={clearApiKey}
+          onClose={toggleSettings}
+        />
+      ) : (
+        <>
+          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+            {messages.map((message) => (
+              <ChatMessage key={message.id} message={message} />
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+          <div className="p-4 border-t">
+            <ChatInput onSendMessage={handleSendMessage} isProcessing={isProcessing} />
+          </div>
+        </>
+      )}
     </div>
   );
 }
