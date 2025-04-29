@@ -958,7 +958,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
   };
   
-  // Similarly define other template generators like generatePortfolioPage(), generateBlogPage(), etc.
+  // Similarly define other template generators like generatePortfolioPage(), generateBlogPage(), generateEcommercePage functions
   const generatePortfolioPage = (colors: any, features: any) => {
     // Similar implementation as generateLandingPage but for portfolio sites
     return {
