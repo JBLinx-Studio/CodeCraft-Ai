@@ -27,7 +27,15 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
   ]);
   
   const [showSettings, setShowSettings] = useState(false);
-  const { generateCode, isProcessing, apiKey, saveApiKey, clearApiKey, apiProvider } = useAI();
+  const { 
+    generateCode, 
+    isProcessing, 
+    apiKey, 
+    saveApiKey, 
+    clearApiKey, 
+    apiProvider,
+    modelType
+  } = useAI();
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -122,6 +130,7 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
         <AISettings 
           apiKey={apiKey}
           apiProvider={apiProvider}
+          modelType={modelType}
           onSave={saveApiKey}
           onClear={clearApiKey}
           onClose={toggleSettings}

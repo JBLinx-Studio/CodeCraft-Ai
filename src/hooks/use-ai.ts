@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { AIResponse } from "@/types";
 import { toast } from "@/components/ui/use-toast";
+import { callPerplexityAPI, parsePerplexityResponse, PERPLEXITY_MODELS } from "@/lib/perplexity-api";
 
 // Configuration options
 const API_OPTIONS = {
@@ -11,6 +11,9 @@ const API_OPTIONS = {
   },
   HUGGINGFACE: {
     url: "https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta",
+  },
+  PERPLEXITY: {
+    url: "https://api.perplexity.ai/chat/completions",
   }
 };
 
@@ -69,21 +72,28 @@ type AIServiceResponse = AIServiceSuccessResponse | AIServiceErrorResponse;
 export function useAI() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
-  const [apiProvider, setApiProvider] = useState<"OPENAI" | "HUGGINGFACE">("HUGGINGFACE");
+  const [apiProvider, setApiProvider] = useState<"OPENAI" | "HUGGINGFACE" | "PERPLEXITY">("PERPLEXITY");
+  const [modelType, setModelType] = useState<string>("SMALL");
   const [chatHistory, setChatHistory] = useState<Array<{role: string, content: string}>>([]);
   
   // Load API key from localStorage on component mount
   useEffect(() => {
     const storedApiKey = localStorage.getItem("webcraft_api_key");
-    const storedProvider = localStorage.getItem("webcraft_api_provider") as "OPENAI" | "HUGGINGFACE";
+    const storedProvider = localStorage.getItem("webcraft_api_provider") as "OPENAI" | "HUGGINGFACE" | "PERPLEXITY";
+    const storedModelType = localStorage.getItem("webcraft_model_type");
     
     if (storedApiKey) setApiKey(storedApiKey);
     if (storedProvider) setApiProvider(storedProvider);
+    if (storedModelType) setModelType(storedModelType);
   }, []);
 
-  const saveApiKey = (key: string, provider: "OPENAI" | "HUGGINGFACE") => {
+  const saveApiKey = (key: string, provider: "OPENAI" | "HUGGINGFACE" | "PERPLEXITY", model?: string) => {
     localStorage.setItem("webcraft_api_key", key);
     localStorage.setItem("webcraft_api_provider", provider);
+    if (model && provider === "PERPLEXITY") {
+      localStorage.setItem("webcraft_model_type", model);
+      setModelType(model);
+    }
     setApiKey(key);
     setApiProvider(provider);
     return true;
@@ -108,7 +118,27 @@ export function useAI() {
     try {
       // If we have an API key, try to use it
       if (apiKey) {
-        const response = await callAIService(prompt, apiKey, apiProvider);
+        let response: AIServiceResponse;
+        
+        if (apiProvider === "PERPLEXITY") {
+          const perplexityResponse = await callPerplexityAPI(
+            apiKey,
+            prompt,
+            chatHistory,
+            modelType as keyof typeof PERPLEXITY_MODELS
+          );
+          
+          if (perplexityResponse.success && perplexityResponse.data) {
+            response = parsePerplexityResponse(perplexityResponse.data);
+          } else {
+            response = {
+              success: false,
+              error: perplexityResponse.error || "Error calling Perplexity API"
+            };
+          }
+        } else {
+          response = await callAIService(prompt, apiKey, apiProvider);
+        }
         
         if (response.success) {
           // Add assistant response to chat history
@@ -962,47 +992,3 @@ document.addEventListener('DOMContentLoaded', function() {
       explanation: "An e-commerce website template"
     };
   };
-  
-  const generateDashboardPage = (colors: any, features: any) => {
-    return {
-      code: {
-        html: "<h1>Dashboard Page</h1>",
-        css: "/* Dashboard styles */",
-        js: "// Dashboard JavaScript"
-      },
-      explanation: "A dashboard application template"
-    };
-  };
-  
-  const generateSocialPage = (colors: any, features: any) => {
-    return {
-      code: {
-        html: "<h1>Social Network Page</h1>",
-        css: "/* Social Network styles */",
-        js: "// Social Network JavaScript"
-      },
-      explanation: "A social network website template"
-    };
-  };
-  
-  const generateTodoPage = (colors: any, features: any) => {
-    return {
-      code: {
-        html: "<h1>Todo App</h1>",
-        css: "/* Todo App styles */",
-        js: "// Todo App JavaScript"
-      },
-      explanation: "A todo application template"
-    };
-  };
-
-  return {
-    generateCode,
-    isProcessing,
-    saveApiKey,
-    clearApiKey,
-    apiKey,
-    apiProvider,
-    chatHistory
-  };
-}

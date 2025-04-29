@@ -12,13 +12,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { Info, Key, X } from "lucide-react";
+import { PERPLEXITY_MODELS } from "@/lib/perplexity-api";
 
 interface AISettingsProps {
   apiKey: string | null;
-  apiProvider: "OPENAI" | "HUGGINGFACE";
-  onSave: (key: string, provider: "OPENAI" | "HUGGINGFACE") => boolean;
+  apiProvider: "OPENAI" | "HUGGINGFACE" | "PERPLEXITY";
+  modelType?: string;
+  onSave: (key: string, provider: "OPENAI" | "HUGGINGFACE" | "PERPLEXITY", modelType?: string) => boolean;
   onClear: () => boolean;
   onClose: () => void;
 }
@@ -26,12 +35,14 @@ interface AISettingsProps {
 export default function AISettings({
   apiKey,
   apiProvider,
+  modelType = "SMALL",
   onSave,
   onClear,
   onClose,
 }: AISettingsProps) {
   const [key, setKey] = useState(apiKey || "");
-  const [provider, setProvider] = useState<"OPENAI" | "HUGGINGFACE">(apiProvider);
+  const [provider, setProvider] = useState<"OPENAI" | "HUGGINGFACE" | "PERPLEXITY">(apiProvider);
+  const [selectedModel, setSelectedModel] = useState(modelType);
   const { toast } = useToast();
 
   const handleSave = () => {
@@ -44,11 +55,11 @@ export default function AISettings({
       return;
     }
 
-    const success = onSave(key, provider);
+    const success = onSave(key, provider, provider === "PERPLEXITY" ? selectedModel : undefined);
     if (success) {
       toast({
         title: "Success",
-        description: "API key saved successfully",
+        description: "AI settings saved successfully",
       });
       onClose();
     }
@@ -84,9 +95,13 @@ export default function AISettings({
             <Label htmlFor="api-provider">AI Provider</Label>
             <RadioGroup
               value={provider}
-              onValueChange={(value) => setProvider(value as "OPENAI" | "HUGGINGFACE")}
+              onValueChange={(value) => setProvider(value as "OPENAI" | "HUGGINGFACE" | "PERPLEXITY")}
               className="flex flex-col space-y-1"
             >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="PERPLEXITY" id="perplexity" />
+                <Label htmlFor="perplexity">Perplexity AI (Recommended)</Label>
+              </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="OPENAI" id="openai" />
                 <Label htmlFor="openai">OpenAI (GPT-3.5 Turbo)</Label>
@@ -97,6 +112,28 @@ export default function AISettings({
               </div>
             </RadioGroup>
           </div>
+
+          {provider === "PERPLEXITY" && (
+            <div className="space-y-2">
+              <Label htmlFor="model-type">Model</Label>
+              <Select 
+                value={selectedModel} 
+                onValueChange={setSelectedModel}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SMALL">Llama 3.1 Sonar Small (8B)</SelectItem>
+                  <SelectItem value="LARGE">Llama 3.1 Sonar Large (70B)</SelectItem>
+                  <SelectItem value="HUGE">Llama 3.1 Sonar Huge (405B)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Small is free, larger models may incur costs.
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="api-key">API Key</Label>
@@ -130,7 +167,7 @@ export default function AISettings({
                       {" "}
                       Get an OpenAI API key
                     </a>
-                  ) : (
+                  ) : provider === "HUGGINGFACE" ? (
                     <a
                       href="https://huggingface.co/settings/tokens"
                       target="_blank"
@@ -139,6 +176,16 @@ export default function AISettings({
                     >
                       {" "}
                       Get a Hugging Face API key
+                    </a>
+                  ) : (
+                    <a
+                      href="https://docs.perplexity.ai/docs/getting-started"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-medium text-blue-700 underline hover:text-blue-600"
+                    >
+                      {" "}
+                      Get a Perplexity API key
                     </a>
                   )}
                 </p>
