@@ -1,36 +1,21 @@
 
 import { useState, useEffect } from "react";
-import { AIResponse } from "@/types";
+import { AIResponse, AIProvider } from "@/types";
 import { toast } from "@/components/ui/use-toast";
-import { callPerplexityAPI, parsePerplexityResponse, PERPLEXITY_MODELS } from "@/lib/perplexity-api";
-import { callAIService } from "@/lib/ai-service";
+import { AIClientFactory } from "@/lib/ai-clients";
 import { smartFallbackGenerator } from "@/lib/template-generator";
-
-// Configuration options
-const API_OPTIONS = {
-  OPENAI: {
-    url: "https://api.openai.com/v1/chat/completions",
-    model: "gpt-3.5-turbo",
-  },
-  HUGGINGFACE: {
-    url: "https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta",
-  },
-  PERPLEXITY: {
-    url: "https://api.perplexity.ai/chat/completions",
-  }
-};
 
 export function useAI() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
-  const [apiProvider, setApiProvider] = useState<"OPENAI" | "HUGGINGFACE" | "PERPLEXITY">("PERPLEXITY");
+  const [apiProvider, setApiProvider] = useState<AIProvider>("PERPLEXITY");
   const [modelType, setModelType] = useState<string>("SMALL");
   const [chatHistory, setChatHistory] = useState<Array<{role: string, content: string}>>([]);
   
   // Load API key from localStorage on component mount
   useEffect(() => {
     const storedApiKey = localStorage.getItem("webcraft_api_key");
-    const storedProvider = localStorage.getItem("webcraft_api_provider") as "OPENAI" | "HUGGINGFACE" | "PERPLEXITY";
+    const storedProvider = localStorage.getItem("webcraft_api_provider") as AIProvider;
     const storedModelType = localStorage.getItem("webcraft_model_type");
     
     if (storedApiKey) setApiKey(storedApiKey);
@@ -38,7 +23,7 @@ export function useAI() {
     if (storedModelType) setModelType(storedModelType);
   }, []);
 
-  const saveApiKey = (key: string, provider: "OPENAI" | "HUGGINGFACE" | "PERPLEXITY", model?: string) => {
+  const saveApiKey = (key: string, provider: AIProvider, model?: string) => {
     localStorage.setItem("webcraft_api_key", key);
     localStorage.setItem("webcraft_api_provider", provider);
     if (model && provider === "PERPLEXITY") {
@@ -69,39 +54,38 @@ export function useAI() {
     try {
       // If we have an API key, try to use it
       if (apiKey) {
-        let response;
-        
-        if (apiProvider === "PERPLEXITY") {
-          const perplexityResponse = await callPerplexityAPI(
+        try {
+          // Create an AI client based on the selected provider
+          const aiClient = AIClientFactory.createClient({
             apiKey,
-            prompt,
-            chatHistory,
-            modelType as keyof typeof PERPLEXITY_MODELS
-          );
+            provider: apiProvider,
+            modelType
+          });
           
-          if (perplexityResponse.success && perplexityResponse.data) {
-            response = parsePerplexityResponse(perplexityResponse.data);
+          const response = await aiClient.generateResponse({
+            prompt,
+            chatHistory
+          });
+          
+          if (response.success && response.data) {
+            // Add assistant response to chat history
+            const explanation = response.data.explanation || "Code generated successfully";
+            addToChatHistory({role: "assistant", content: explanation});
+            return response.data;
           } else {
-            response = {
-              success: false,
-              error: perplexityResponse.error || "Error calling Perplexity API"
-            };
+            // If API call fails, log the error and fall back
+            console.error("API call failed:", response.error);
+            toast({
+              title: "API Error",
+              description: response.error || "Error connecting to AI service",
+              variant: "destructive",
+            });
           }
-        } else {
-          response = await callAIService(prompt, apiKey, apiProvider, chatHistory);
-        }
-        
-        if (response.success) {
-          // Add assistant response to chat history
-          const explanation = response.data.explanation || "Code generated successfully";
-          addToChatHistory({role: "assistant", content: explanation});
-          return response.data;
-        } else {
-          // If API call fails, log the error and fall back
-          console.error("API call failed:", response.error);
+        } catch (error) {
+          console.error("Error calling AI service:", error);
           toast({
             title: "API Error",
-            description: response.error || "Error connecting to AI service",
+            description: error instanceof Error ? error.message : "Error connecting to AI service",
             variant: "destructive",
           });
         }

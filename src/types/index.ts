@@ -37,4 +37,12 @@ export interface AIResponse {
   error?: string;
 }
 
+export interface AIServiceResponse {
+  success: boolean;
+  data?: AIResponse;
+  error?: string;
+}
+
 export type AppView = 'chat' | 'preview' | 'code' | 'export';
+
+export type AIProvider = 'OPENAI' | 'HUGGINGFACE' | 'PERPLEXITY';

@@ -21,13 +21,14 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { Info, Key, X } from "lucide-react";
-import { PERPLEXITY_MODELS } from "@/lib/perplexity-api";
+import { AIProvider } from "@/types";
+import { PERPLEXITY_MODELS } from "@/lib/ai-clients";
 
 interface AISettingsProps {
   apiKey: string | null;
-  apiProvider: "OPENAI" | "HUGGINGFACE" | "PERPLEXITY";
+  apiProvider: AIProvider;
   modelType?: string;
-  onSave: (key: string, provider: "OPENAI" | "HUGGINGFACE" | "PERPLEXITY", modelType?: string) => boolean;
+  onSave: (key: string, provider: AIProvider, modelType?: string) => boolean;
   onClear: () => boolean;
   onClose: () => void;
 }
