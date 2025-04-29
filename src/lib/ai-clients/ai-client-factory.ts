@@ -17,11 +17,20 @@ export class AIClientFactory {
     
     switch (provider) {
       case "OPENAI":
-        return new OpenAIClient({ apiKey, model: "gpt-3.5-turbo" });
+        return new OpenAIClient({ 
+          apiKey, 
+          model: "gpt-3.5-turbo" 
+        });
       case "HUGGINGFACE":
-        return new HuggingFaceClient({ apiKey, model: "HuggingFaceH4/zephyr-7b-beta" });
+        return new HuggingFaceClient({ 
+          apiKey, 
+          model: "HuggingFaceH4/zephyr-7b-beta" 
+        });
       case "PERPLEXITY":
-        return new PerplexityClient({ apiKey, model: modelType as keyof typeof PERPLEXITY_MODELS });
+        return new PerplexityClient({ 
+          apiKey, 
+          model: modelType as keyof typeof PERPLEXITY_MODELS 
+        });
       default:
         throw new Error(`Unsupported AI provider: ${provider}`);
     }

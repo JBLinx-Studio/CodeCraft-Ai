@@ -93,12 +93,19 @@ export class HuggingFaceClient extends AIClient {
   
   private createEnhancedPrompt(userPrompt: string, history: Array<{role: string, content: string}>) {
     return `
-You are a web development AI that creates HTML, CSS, and JavaScript code.
-Based on this request, generate code for a web page:
+You are WebCraft AI, an expert web development assistant. Your responses are thoughtful, detailed, and helpful.
+You approach problems step-by-step and explain your reasoning clearly.
+
+Based on this request, generate clean, modern code for a web page:
 
 ${userPrompt}
 
-${history.length > 0 ? `Previous conversation context: ${history.slice(-2).map(msg => `${msg.role}: ${msg.content}`).join("\n")}` : ""}
+${history.length > 0 ? `Previous conversation context:\n${this.formatChatHistory(history)}` : ""}
+
+Please respond with:
+1. A thoughtful analysis of what's being requested
+2. Your implementation approach
+3. Code that meets the requirements
 
 Format your answer as:
 \`\`\`html
@@ -106,16 +113,16 @@ Format your answer as:
 \`\`\`
 
 \`\`\`css
-/* styles */
+/* styles with responsive design */
 \`\`\`
 
 \`\`\`js
-// scripts
+// well-documented scripts
 \`\`\`
 
-Explanation: briefly explain what this code does
+Explanation: Provide a detailed explanation that covers your approach, key decisions, and how the code works
 
-Generate responsive code with CSS best practices.
+Focus on creating responsive, accessible, and maintainable code with best practices.
 `;
   }
 }

@@ -18,9 +18,23 @@ export class OpenAIClient extends AIClient {
     try {
       const { prompt, chatHistory } = params;
       
-      // Create an enhanced prompt
-      const enhancedPrompt = this.createEnhancedPrompt(prompt, chatHistory);
-      
+      const systemPrompt = `You are WebCraft AI, a specialized web development assistant that generates high-quality code for web applications.
+You provide thoughtful, step-by-step explanations and create responsive, accessible, modern web applications.
+When responding:
+1. First understand the user's request thoroughly
+2. Provide a brief explanation of your approach
+3. Generate clean, well-commented code that follows best practices
+4. Include helpful explanations about how the code works
+5. Consider edge cases and performance optimizations
+
+Always structure your response as valid JSON with the following format:
+{
+  "html": "Complete HTML code here with appropriate comments",
+  "css": "Complete CSS code here with modern responsive design patterns",
+  "js": "Complete JavaScript code here with proper error handling",
+  "explanation": "Detailed step-by-step explanation of how the code works and why you made certain decisions"
+}`;
+
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -30,17 +44,12 @@ export class OpenAIClient extends AIClient {
         body: JSON.stringify({
           model: this.model,
           messages: [
-            {
-              role: "system", 
-              content: "You are WebCraft AI, a specialized assistant that generates high-quality code for web applications. You always respond with valid JSON containing HTML, CSS, and JavaScript code."
-            },
+            { role: "system", content: systemPrompt },
             ...chatHistory.slice(-5), // Include last 5 messages for context
-            {
-              role: "user", 
-              content: enhancedPrompt
-            }
+            { role: "user", content: this.enhancePromptWithContext(prompt, []) }
           ],
           temperature: 0.7,
+          max_tokens: 4000
         }),
       });
 
@@ -85,85 +94,5 @@ export class OpenAIClient extends AIClient {
     } catch (error) {
       return { success: false, error: "Error parsing API response" };
     }
-  }
-  
-  private createEnhancedPrompt(userPrompt: string, history: Array<{role: string, content: string}>) {
-    // Extract keywords from the prompt and previous conversation
-    const allText = [
-      userPrompt,
-      ...history.map(msg => msg.content)
-    ].join(" ");
-    
-    // Extract key features requested
-    const features = this.extractRequestedFeatures(allText);
-    const stylePreferences = this.extractStylePreferences(allText);
-    
-    // Build a more specific prompt for the AI model
-    return `
-You are a web development AI that generates working HTML, CSS, and JavaScript code for web applications.
-Based on the following request, generate code that can be used in a standalone web page.
-
-User Request: ${userPrompt}
-
-${history.length > 0 ? `Previous conversation context: ${history.slice(-3).map(msg => `${msg.role}: ${msg.content}`).join("\n")}` : ""}
-
-Requested features: ${features.join(", ")}
-Style preferences: ${stylePreferences.join(", ")}
-
-Please provide your response in the following JSON format ONLY:
-{
-  "html": "full HTML code here",
-  "css": "full CSS code here",
-  "js": "full JavaScript code here",
-  "explanation": "brief explanation of what the code does"
-}
-
-Generate clean, modern, responsive code using best practices. Include comments where appropriate.
-`;
-  }
-  
-  private extractRequestedFeatures(text: string) {
-    const featureKeywords = {
-      "form": ["form", "input", "submit", "field"],
-      "navigation": ["navigation", "navbar", "menu", "header"],
-      "gallery": ["gallery", "carousel", "slider", "images"],
-      "authentication": ["login", "register", "auth", "account"],
-      "dark mode": ["dark mode", "theme", "toggle", "light/dark"],
-      "responsive": ["responsive", "mobile", "desktop", "media query"],
-      "animation": ["animation", "transition", "fade", "slide"],
-    };
-    
-    const foundFeatures: string[] = [];
-    
-    Object.entries(featureKeywords).forEach(([feature, keywords]) => {
-      const textLower = text.toLowerCase();
-      if (keywords.some(keyword => textLower.includes(keyword.toLowerCase()))) {
-        foundFeatures.push(feature);
-      }
-    });
-    
-    return foundFeatures.length > 0 ? foundFeatures : ["basic website"];
-  }
-  
-  private extractStylePreferences(text: string) {
-    const styleKeywords = {
-      "minimalist": ["minimalist", "clean", "simple", "minimal"],
-      "colorful": ["colorful", "vibrant", "bright", "bold colors"],
-      "professional": ["professional", "business", "corporate", "formal"],
-      "playful": ["playful", "fun", "creative", "casual"],
-      "modern": ["modern", "contemporary", "sleek", "cutting-edge"],
-      "retro": ["retro", "vintage", "classic", "nostalgic"],
-    };
-    
-    const foundStyles: string[] = [];
-    
-    Object.entries(styleKeywords).forEach(([style, keywords]) => {
-      const textLower = text.toLowerCase();
-      if (keywords.some(keyword => textLower.includes(keyword.toLowerCase()))) {
-        foundStyles.push(style);
-      }
-    });
-    
-    return foundStyles.length > 0 ? foundStyles : ["modern", "clean"];
   }
 }

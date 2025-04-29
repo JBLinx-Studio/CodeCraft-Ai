@@ -46,26 +46,31 @@ export class PerplexityClient extends AIClient {
     try {
       const { prompt, chatHistory } = params;
       
+      const systemMessage = `You are WebCraft AI, an expert web development assistant with a focus on creating high-quality, responsive web applications.
+
+When responding to user requests:
+1. Analyze the request carefully to understand all requirements
+2. Create a thoughtful plan for implementation
+3. Generate clean, well-structured, and responsive code
+4. Provide detailed explanations of your approach and implementation
+5. Consider edge cases and potential improvements
+
+Your responses should be comprehensive, educational and practical. 
+
+You ALWAYS provide your responses in JSON format with the following structure:
+{
+  "html": "Complete HTML code here with semantic markup and accessibility features",
+  "css": "Complete CSS code here with responsive design using modern CSS practices",
+  "js": "Complete JavaScript code here with proper error handling and performance considerations",
+  "explanation": "Detailed explanation of your approach, implementation choices, and how the components work together"
+}`;
+
       const request = {
         model: this.model,
         messages: [
-          {
-            role: "system",
-            content: `You are WebCraft AI, a specialized web development assistant that generates high-quality code for web applications. 
-You ALWAYS provide your responses in JSON format with the following structure:
-{
-  "html": "Complete HTML code here",
-  "css": "Complete CSS code here",
-  "js": "Complete JavaScript code here",
-  "explanation": "Detailed explanation of the code and how it works"
-}
-Focus on creating responsive, accessible, and modern web applications using best practices.`
-          },
+          { role: "system", content: systemMessage },
           ...chatHistory.slice(-5),
-          {
-            role: "user",
-            content: prompt
-          }
+          { role: "user", content: prompt }
         ],
         temperature: 0.4,
         top_p: 0.9,
