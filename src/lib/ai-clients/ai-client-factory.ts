@@ -1,9 +1,10 @@
 
 import { AIProvider } from "@/types";
-import { AIClient } from "./base-client";
+import { AIClient, FREE_API_KEY } from "./base-client";
 import { OpenAIClient } from "./openai-client";
 import { HuggingFaceClient } from "./huggingface-client";
 import { PerplexityClient, PERPLEXITY_MODELS } from "./perplexity-client";
+import { FreeAPIClient } from "./free-client";
 
 export interface AIClientFactoryOptions {
   apiKey: string;
@@ -14,6 +15,11 @@ export interface AIClientFactoryOptions {
 export class AIClientFactory {
   static createClient(options: AIClientFactoryOptions): AIClient {
     const { apiKey, provider, modelType } = options;
+    
+    // If using free API, automatically switch to the FreeAPIClient
+    if (apiKey === FREE_API_KEY) {
+      return new FreeAPIClient({ apiKey: FREE_API_KEY });
+    }
     
     switch (provider) {
       case "OPENAI":
@@ -31,6 +37,8 @@ export class AIClientFactory {
           apiKey, 
           model: modelType as keyof typeof PERPLEXITY_MODELS 
         });
+      case "FREE":
+        return new FreeAPIClient({ apiKey: FREE_API_KEY });
       default:
         throw new Error(`Unsupported AI provider: ${provider}`);
     }

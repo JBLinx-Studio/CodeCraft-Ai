@@ -45,4 +45,4 @@ export interface AIServiceResponse {
 
 export type AppView = 'chat' | 'preview' | 'code' | 'export';
 
-export type AIProvider = 'OPENAI' | 'HUGGINGFACE' | 'PERPLEXITY';
+export type AIProvider = 'OPENAI' | 'HUGGINGFACE' | 'PERPLEXITY' | 'FREE';

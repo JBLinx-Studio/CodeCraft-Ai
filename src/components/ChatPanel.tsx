@@ -32,9 +32,11 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
     isProcessing, 
     apiKey, 
     saveApiKey, 
-    clearApiKey, 
+    clearApiKey,
+    setFreeAPI,
     apiProvider,
-    modelType
+    modelType,
+    usingFreeAPI
   } = useAI();
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -109,7 +111,12 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center px-4 py-2">
-        <h2 className="text-lg font-medium">Chat</h2>
+        <h2 className="text-lg font-medium">
+          Chat
+          {usingFreeAPI && (
+            <span className="ml-2 text-xs font-normal text-amber-600 bg-amber-50 px-2 py-0.5 rounded">Free API Mode</span>
+          )}
+        </h2>
         <div className="flex gap-2">
           <Button 
             variant="ghost" 
@@ -131,9 +138,11 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
           apiKey={apiKey}
           apiProvider={apiProvider}
           modelType={modelType}
+          usingFreeAPI={usingFreeAPI}
           onSave={saveApiKey}
           onClear={clearApiKey}
           onClose={toggleSettings}
+          onSetFreeAPI={setFreeAPI}
         />
       ) : (
         <>

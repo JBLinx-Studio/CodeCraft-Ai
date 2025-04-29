@@ -39,3 +39,6 @@ ${history.length > 0 ? `Previous conversation context:\n${this.formatChatHistory
     `;
   }
 }
+
+// Free API key for testing purposes
+export const FREE_API_KEY = "webcraft_free_testing_key";

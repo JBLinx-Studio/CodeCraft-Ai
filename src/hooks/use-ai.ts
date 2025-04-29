@@ -4,6 +4,7 @@ import { AIResponse, AIProvider } from "@/types";
 import { toast } from "@/components/ui/use-toast";
 import { AIClientFactory } from "@/lib/ai-clients";
 import { smartFallbackGenerator } from "@/lib/template-generator";
+import { FREE_API_KEY } from "@/lib/ai-clients/base-client";
 
 export function useAI() {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -11,33 +12,58 @@ export function useAI() {
   const [apiProvider, setApiProvider] = useState<AIProvider>("PERPLEXITY");
   const [modelType, setModelType] = useState<string>("SMALL");
   const [chatHistory, setChatHistory] = useState<Array<{role: string, content: string}>>([]);
+  const [usingFreeAPI, setUsingFreeAPI] = useState<boolean>(false);
   
   // Load API key from localStorage on component mount
   useEffect(() => {
     const storedApiKey = localStorage.getItem("webcraft_api_key");
     const storedProvider = localStorage.getItem("webcraft_api_provider") as AIProvider;
     const storedModelType = localStorage.getItem("webcraft_model_type");
+    const storedUsingFree = localStorage.getItem("webcraft_using_free_api") === "true";
     
     if (storedApiKey) setApiKey(storedApiKey);
     if (storedProvider) setApiProvider(storedProvider);
     if (storedModelType) setModelType(storedModelType);
+    setUsingFreeAPI(storedUsingFree);
+    
+    // If using free API, make sure we have the free API key set
+    if (storedUsingFree) {
+      setApiKey(FREE_API_KEY);
+      setApiProvider("FREE");
+    }
   }, []);
 
   const saveApiKey = (key: string, provider: AIProvider, model?: string) => {
     localStorage.setItem("webcraft_api_key", key);
     localStorage.setItem("webcraft_api_provider", provider);
+    setUsingFreeAPI(provider === "FREE");
+    localStorage.setItem("webcraft_using_free_api", provider === "FREE" ? "true" : "false");
+    
     if (model && provider === "PERPLEXITY") {
       localStorage.setItem("webcraft_model_type", model);
       setModelType(model);
     }
+    
     setApiKey(key);
     setApiProvider(provider);
     return true;
   };
 
+  const setFreeAPI = () => {
+    localStorage.setItem("webcraft_api_key", FREE_API_KEY);
+    localStorage.setItem("webcraft_api_provider", "FREE");
+    localStorage.setItem("webcraft_using_free_api", "true");
+    setApiKey(FREE_API_KEY);
+    setApiProvider("FREE");
+    setUsingFreeAPI(true);
+    return true;
+  };
+
   const clearApiKey = () => {
     localStorage.removeItem("webcraft_api_key");
+    localStorage.setItem("webcraft_using_free_api", "false");
     setApiKey(null);
+    setUsingFreeAPI(false);
     return true;
   };
 
@@ -52,13 +78,13 @@ export function useAI() {
     addToChatHistory({role: "user", content: prompt});
     
     try {
-      // If we have an API key, try to use it
+      // If we have an API key (including free key), try to use it
       if (apiKey) {
         try {
           // Create an AI client based on the selected provider
           const aiClient = AIClientFactory.createClient({
             apiKey,
-            provider: apiProvider,
+            provider: usingFreeAPI ? "FREE" : apiProvider,
             modelType
           });
           
@@ -125,9 +151,11 @@ export function useAI() {
     apiKey,
     apiProvider,
     modelType,
+    usingFreeAPI,
     chatHistory,
     generateCode,
     saveApiKey,
     clearApiKey,
+    setFreeAPI,
   };
 }
