@@ -1,5 +1,5 @@
 
-import { useState, FormEvent } from "react";
+import React, { useState, FormEvent, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { SendIcon } from "lucide-react";
@@ -30,7 +30,7 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
   };
 
   // Simulate the AI thinking with a typing indicator when processing
-  React.useEffect(() => {
+  useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     if (isProcessing) {
       const thinkingStates = ["", ".", "..", "..."];

@@ -1,7 +1,7 @@
 
 import { AIClient, AIClientOptions, AIRequestParams } from "./base-client";
 import { AIServiceResponse } from "@/types";
-import { extractCodeBlocks } from "../utils";
+import { extractCodeBlocks } from "@/lib/utils";
 
 export interface FreeClientOptions extends AIClientOptions {
   model?: string;
