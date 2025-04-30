@@ -1,4 +1,3 @@
-
 import { AIClient, AIClientOptions, AIRequestParams } from "./base-client";
 import { AIServiceResponse } from "@/types";
 import { extractCodeBlocks } from "@/lib/utils";
@@ -13,7 +12,8 @@ export class FreeAPIClient extends AIClient {
   
   constructor(options: FreeClientOptions) {
     super(options);
-    this.model = options.model || "meta-llama/Meta-Llama-3-8B-Instruct";
+    // Using a model that's more accessible without authentication
+    this.model = options.model || "google/flan-t5-small";
   }
   
   async generateResponse(params: AIRequestParams): Promise<AIServiceResponse> {
@@ -31,13 +31,13 @@ export class FreeAPIClient extends AIClient {
       const messages = this.formatMessagesForLLM(prompt, chatHistory);
       
       try {
-        // Try Hugging Face Inference API (free tier)
-        const response = await this.callHuggingFaceAPI(messages);
+        // Try alternative inference API without authentication requirements
+        const response = await this.callInferenceAPI(messages);
         if (response && response.success) {
           return response;
         }
       } catch (error) {
-        console.error("Error with HuggingFace API:", error);
+        console.error("Error with Inference API:", error);
         // Fall back to local processing if API fails
       }
       
@@ -54,42 +54,33 @@ export class FreeAPIClient extends AIClient {
     }
   }
   
-  private async callHuggingFaceAPI(messages: any[]): Promise<AIServiceResponse> {
+  private async callInferenceAPI(messages: any[]): Promise<AIServiceResponse> {
     try {
-      // Format the prompt for the Hugging Face API
-      const formattedMessages = messages.map(msg => {
-        if (msg.role === "system") return `<|system|>\n${msg.content}\n`;
-        if (msg.role === "user") return `<|user|>\n${msg.content}\n`;
-        if (msg.role === "assistant") return `<|assistant|>\n${msg.content}\n`;
-        return `${msg.role}: ${msg.content}\n`;
-      }).join("");
+      // Format the prompt for a public API model
+      const lastMessage = messages[messages.length - 1];
+      const userPrompt = lastMessage.content || "";
       
-      const finalPrompt = `${formattedMessages}<|assistant|>\n`;
-      
-      // Call the Hugging Face Inference API (free tier)
-      const response = await fetch("https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct", {
+      // Use a public API that doesn't require authentication
+      const response = await fetch("https://api-inference.huggingface.co/models/google/flan-t5-small", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          inputs: finalPrompt,
-          parameters: {
-            max_new_tokens: 1024,
-            temperature: 0.7,
-            top_p: 0.9,
-            do_sample: true,
-            return_full_text: false
+          inputs: userPrompt,
+          options: {
+            wait_for_model: true
           }
         }),
       });
       
       if (!response.ok) {
-        throw new Error(`Hugging Face API error: ${response.status}`);
+        console.log("API responded with status:", response.status);
+        throw new Error(`Inference API error: ${response.status}`);
       }
       
       const data = await response.json();
-      const generatedText = data[0]?.generated_text || "";
+      const generatedText = Array.isArray(data) && data.length > 0 ? data[0].generated_text : "";
       
       // Extract any code blocks from the response
       const { code, explanation } = extractCodeBlocks(generatedText);
@@ -106,7 +97,7 @@ export class FreeAPIClient extends AIClient {
         }
       };
     } catch (error) {
-      console.error("Error calling Hugging Face API:", error);
+      console.error("Error calling Inference API:", error);
       throw error;
     }
   }

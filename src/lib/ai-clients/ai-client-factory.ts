@@ -19,7 +19,11 @@ export class AIClientFactory {
     // If using free API, automatically switch to the FreeAPIClient
     if (provider === "FREE" || apiKey === FREE_API_KEY) {
       console.log("Using free API mode");
-      return new FreeAPIClient({ apiKey: FREE_API_KEY });
+      return new FreeAPIClient({ 
+        apiKey: FREE_API_KEY,
+        // Using a model that doesn't require auth
+        model: "google/flan-t5-small" 
+      });
     }
     
     switch (provider) {
