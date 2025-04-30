@@ -46,35 +46,37 @@ export class PerplexityClient extends AIClient {
     try {
       const { prompt, chatHistory } = params;
       
-      // Handle simple greetings directly
-      if (this.isSimpleGreeting(prompt)) {
-        return this.handleSimpleGreeting(prompt, chatHistory);
+      // Check if this is a simple conversation rather than a code request
+      if (this.isSimpleConversation(prompt)) {
+        return this.handleConversation(prompt, chatHistory);
       }
       
       const systemMessage = `${this.createEnhancedSystemPrompt()}
 
-When responding to the user, follow this specific structure:
+When responding to the user's web development request, follow this structure:
 
-1. Start with a "Thinking:" section where you think step by step about the request, analyze requirements, and plan your approach.
+1. First, share your Thinking Process - analyze the request thoroughly, consider different approaches, and show your reasoning step by step.
 
-2. Then provide your code solution in JSON format:
+2. For code solutions, structure your response with clear code blocks:
 {
-  "html": "Complete HTML code with semantic structure and helpful comments",
-  "css": "Complete CSS code with responsive design and clear organization",
-  "js": "Complete JavaScript code with proper error handling and readability",
+  "html": "<!-- Complete HTML code with helpful comments -->",
+  "css": "/* Complete CSS code with organization and comments */",
+  "js": "// Complete JavaScript code with detailed comments",
   "explanation": "Detailed explanation of your implementation approach, key decisions, and how components work together"
 }
 
-Make your response educational, thoughtful, and practical. Show your reasoning process clearly.`;
+3. If the user is asking a question rather than requesting code, provide an educational and thorough explanation that helps them understand the concept deeply.
+
+Make your response conversational, educational, and practical - as if you're a helpful colleague working through the problem together.`;
 
       const request = {
         model: this.model,
         messages: [
           { role: "system", content: systemMessage },
-          ...chatHistory.slice(-5),
+          ...chatHistory.slice(-10), // Include more context from previous messages
           { role: "user", content: prompt }
         ],
-        temperature: 0.4,
+        temperature: 0.7, // Increased for more creative/diverse responses
         top_p: 0.9,
         max_tokens: 4000
       };
@@ -106,40 +108,65 @@ Make your response educational, thoughtful, and practical. Show your reasoning p
     }
   }
   
-  private isSimpleGreeting(prompt: string): boolean {
+  private isSimpleConversation(prompt: string): boolean {
     const simplifiedPrompt = prompt.toLowerCase().trim();
-    const greetings = [
+    
+    // Check for greetings and simple questions
+    const conversationStarters = [
       "hello", "hi", "hey", "greetings", "howdy", 
       "what's up", "whats up", "sup", "yo", 
-      "good morning", "good afternoon", "good evening"
+      "good morning", "good afternoon", "good evening",
+      "help", "who are you", "what can you do", "how does this work"
     ];
     
-    return greetings.some(greeting => 
-      simplifiedPrompt === greeting || 
-      simplifiedPrompt.startsWith(`${greeting} `) || 
-      simplifiedPrompt.startsWith(`${greeting},`)
+    // Check for exact matches or starts with
+    return conversationStarters.some(starter => 
+      simplifiedPrompt === starter || 
+      simplifiedPrompt.startsWith(`${starter} `) || 
+      simplifiedPrompt.startsWith(`${starter},`) ||
+      simplifiedPrompt.includes(starter)
     );
   }
   
-  private handleSimpleGreeting(prompt: string, history: Array<{role: string, content: string}>): AIServiceResponse {
+  private handleConversation(prompt: string, history: Array<{role: string, content: string}>): AIServiceResponse {
     const isFirstMessage = history.filter(msg => msg.role === "user").length === 0;
+    const simplifiedPrompt = prompt.toLowerCase().trim();
+    let response = "";
     
-    let greeting = "Hello! I'm WebCraft AI, your full-stack web development assistant. ";
-    
-    if (prompt.toLowerCase().includes("morning")) {
-      greeting = "Good morning! I'm WebCraft AI, ready to help with your web development projects. ";
-    } else if (prompt.toLowerCase().includes("afternoon")) {
-      greeting = "Good afternoon! I'm WebCraft AI, excited to assist with your web development needs. ";
-    } else if (prompt.toLowerCase().includes("evening")) {
-      greeting = "Good evening! I'm WebCraft AI, here to help with your web development tasks. ";
+    // Handle different types of conversational prompts
+    if (simplifiedPrompt.includes("hello") || simplifiedPrompt.includes("hi") || 
+        simplifiedPrompt.includes("hey") || simplifiedPrompt.includes("greetings")) {
+      // Handle time-based greetings
+      if (simplifiedPrompt.includes("morning")) {
+        response = "Good morning! ";
+      } else if (simplifiedPrompt.includes("afternoon")) {
+        response = "Good afternoon! ";
+      } else if (simplifiedPrompt.includes("evening")) {
+        response = "Good evening! ";
+      } else {
+        response = "Hello! ";
+      }
+      
+      response += "I'm WebCraft AI, your web development assistant. ";
+    }
+    else if (simplifiedPrompt.includes("who are you") || simplifiedPrompt.includes("what are you")) {
+      response = "I'm WebCraft AI, a development assistant specialized in helping you build web applications. ";
+    }
+    else if (simplifiedPrompt.includes("what can you do") || 
+             simplifiedPrompt.includes("how") || simplifiedPrompt.includes("help")) {
+      response = "I can help you create web applications by writing code, explaining concepts, and suggesting solutions to development problems. ";
+    }
+    else {
+      // Generic conversation response
+      response = "I'm here to help with your web development needs. ";
     }
     
-    let message = "";
-    
+    // Add more context based on conversation history
     if (isFirstMessage) {
-      message = `${greeting}I can help you build amazing web applications by providing both guidance and code. What would you like to create today? You can describe a project, ask for specific features, or let me know if you have any questions about web development.`;
+      response += "I can help you build websites and web applications by generating HTML, CSS, and JavaScript code based on your descriptions. You can describe what you want to build, ask for specific features, or ask questions about web development concepts. What would you like to create today?";
     } else {
-      message = `${greeting}I'm here to continue helping with your web development project. What would you like to work on next?`;
+      // Reference previous conversation
+      response += "How else can I assist you with your web development project? Feel free to ask about specific features, request code examples, or ask about web development concepts.";
     }
     
     return {
@@ -150,7 +177,7 @@ Make your response educational, thoughtful, and practical. Show your reasoning p
           css: "",
           js: ""
         },
-        explanation: message
+        explanation: response
       }
     };
   }
@@ -161,7 +188,7 @@ Make your response educational, thoughtful, and practical. Show your reasoning p
       
       // Extract thinking process
       let thinkingProcess = "";
-      const thinkingMatch = content.match(/Thinking:([\s\S]*?)(?=\{|\`\`\`|HTML:|CSS:|JS:|<html>|$)/i);
+      const thinkingMatch = content.match(/(?:Thinking Process:|Thinking:|Analysis:|I'll analyze this step by step:)([\s\S]*?)(?=\{|\`\`\`|HTML:|CSS:|JS:|<html>|$)/i);
       if (thinkingMatch) {
         thinkingProcess = thinkingMatch[1].trim();
       }
@@ -181,8 +208,8 @@ Make your response educational, thoughtful, and practical. Show your reasoning p
                 js: parsed.js || ""
               },
               explanation: thinkingProcess 
-                ? `${thinkingProcess}\n\n${parsed.explanation || "Generated with Perplexity AI"}` 
-                : (parsed.explanation || "Generated with Perplexity AI")
+                ? `${thinkingProcess}\n\n${parsed.explanation || ""}` 
+                : (parsed.explanation || "")
             }
           };
         }
@@ -193,14 +220,16 @@ Make your response educational, thoughtful, and practical. Show your reasoning p
       // Fall back to code block extraction
       const htmlMatch = content.match(/```html([\s\S]*?)```/);
       const cssMatch = content.match(/```css([\s\S]*?)```/);
-      const jsMatch = content.match(/```js|```javascript([\s\S]*?)```/);
+      const jsMatch = content.match(/```(?:js|javascript)([\s\S]*?)```/);
       
       // Extract explanation by removing code blocks
       let explanation = content.replace(/```html[\s\S]*?```/g, "")
                      .replace(/```css[\s\S]*?```/g, "")
                      .replace(/```js[\s\S]*?```/g, "")
                      .replace(/```javascript[\s\S]*?```/g, "")
+                     .replace(/Thinking Process:[\s\S]*?(?=HTML:|CSS:|JS:|<html>|$)/i, "")
                      .replace(/Thinking:[\s\S]*?(?=HTML:|CSS:|JS:|<html>|$)/i, "")
+                     .replace(/Analysis:[\s\S]*?(?=HTML:|CSS:|JS:|<html>|$)/i, "")
                      .trim();
       
       if (htmlMatch || cssMatch || jsMatch) {
@@ -217,16 +246,16 @@ Make your response educational, thoughtful, and practical. Show your reasoning p
         };
       }
       
-      // If no structured content found, use the entire content
+      // If no structured content found, use the entire content as explanation
       return {
         success: true,
         data: {
           code: {
-            html: "<div>Default content</div>",
-            css: "/* Default styles */",
-            js: "// Default script"
+            html: "",
+            css: "",
+            js: ""
           },
-          explanation: thinkingProcess ? `${thinkingProcess}\n\n${explanation}` : content
+          explanation: content
         }
       };
     } catch (error) {

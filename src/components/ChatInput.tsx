@@ -32,7 +32,7 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <div className="relative">
         <Textarea
-          placeholder={isProcessing ? "Generating response..." : "Describe the web app you want to create..."}
+          placeholder={isProcessing ? "Generating response..." : "Ask me anything about web development..."}
           className={cn(
             "min-h-[100px] pr-10 resize-none overflow-auto",
             isProcessing && "bg-gray-50"
@@ -55,7 +55,7 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
         </Button>
       </div>
       <div className="text-xs text-muted-foreground flex justify-between items-center">
-        <span>Powered by AI • {isProcessing ? "Generating response..." : "Ready"}</span>
+        <span>Powered by AI • {isProcessing ? "Thinking..." : "Ready"}</span>
         <span className="text-xs">
           {message.length > 0 ? `${message.length} characters` : ""}
         </span>

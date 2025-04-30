@@ -21,7 +21,7 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
     {
       id: "system-1",
       role: "assistant",
-      content: "Hello! I'm WebCraft AI. I can help you build amazing web applications. Describe what you want to create, and I'll generate the code for you. You can request specific features, layouts, or functionality.",
+      content: "Hello! I'm WebCraft AI. I can help you build amazing web applications. What would you like to create today? You can describe what you want to build or ask me questions about web development.",
       timestamp: Date.now(),
     },
   ]);
@@ -58,28 +58,29 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
       return;
     }
     
-    // For simple greetings, show a thinking message
-    const simplifiedContent = content.toLowerCase().trim();
-    const isSimpleGreeting = ["hello", "hi", "hey", "greetings"].includes(simplifiedContent);
+    // Always add a thinking message to show the AI is processing
+    const thinkingId = nanoid();
+    const thinkingMessages = [
+      "Analyzing your request...",
+      "Thinking about the best approach...",
+      "Processing your question...",
+      "Considering different solutions..."
+    ];
+    // Randomly select a thinking message
+    const thinkingMessage = thinkingMessages[Math.floor(Math.random() * thinkingMessages.length)];
     
-    if (!isSimpleGreeting) {
-      // Add a "thinking" message for more complex requests
-      const thinkingId = nanoid();
-      setMessages((prev) => [...prev, {
-        id: thinkingId,
-        role: "assistant",
-        content: "I'm thinking about how to implement this...",
-        timestamp: Date.now(),
-      }]);
-    }
+    setMessages((prev) => [...prev, {
+      id: thinkingId,
+      role: "assistant",
+      content: thinkingMessage,
+      timestamp: Date.now(),
+    }]);
     
     try {
       const response = await generateCode(content);
       
-      // Remove the thinking message if it exists
-      if (!isSimpleGreeting) {
-        setMessages(prev => prev.filter(msg => msg.content !== "I'm thinking about how to implement this..."));
-      }
+      // Remove the thinking message
+      setMessages(prev => prev.filter(msg => msg.id !== thinkingId));
       
       if (response.error) {
         addMessage("assistant", `I encountered an error: ${response.error}. Please try again with a different request.`);
@@ -104,8 +105,8 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
     } catch (error) {
       console.error("Error generating code:", error);
       
-      // Remove the thinking message if it exists
-      setMessages(prev => prev.filter(msg => msg.content !== "I'm thinking about how to implement this..."));
+      // Remove the thinking message
+      setMessages(prev => prev.filter(msg => msg.id !== thinkingId));
       
       addMessage("assistant", "I'm having trouble generating code right now. Please try again later.");
       toast({
@@ -127,7 +128,7 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
       {
         id: "system-1",
         role: "assistant",
-        content: "Chat cleared. What would you like to create now?",
+        content: "Chat cleared. What would you like to create now? I'm here to help with your web development needs.",
         timestamp: Date.now(),
       },
     ]);
