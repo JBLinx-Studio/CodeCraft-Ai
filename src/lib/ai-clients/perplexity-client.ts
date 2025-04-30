@@ -46,24 +46,26 @@ export class PerplexityClient extends AIClient {
     try {
       const { prompt, chatHistory } = params;
       
-      const systemMessage = `You are WebCraft AI, an expert web development assistant with a focus on creating high-quality, responsive web applications.
+      // Handle simple greetings directly
+      if (this.isSimpleGreeting(prompt)) {
+        return this.handleSimpleGreeting(prompt, chatHistory);
+      }
+      
+      const systemMessage = `${this.createEnhancedSystemPrompt()}
 
-When responding to user requests:
-1. Analyze the request carefully to understand all requirements
-2. Create a thoughtful plan for implementation
-3. Generate clean, well-structured, and responsive code
-4. Provide detailed explanations of your approach and implementation
-5. Consider edge cases and potential improvements
+When responding to the user, follow this specific structure:
 
-Your responses should be comprehensive, educational and practical. 
+1. Start with a "Thinking:" section where you think step by step about the request, analyze requirements, and plan your approach.
 
-You ALWAYS provide your responses in JSON format with the following structure:
+2. Then provide your code solution in JSON format:
 {
-  "html": "Complete HTML code here with semantic markup and accessibility features",
-  "css": "Complete CSS code here with responsive design using modern CSS practices",
-  "js": "Complete JavaScript code here with proper error handling and performance considerations",
-  "explanation": "Detailed explanation of your approach, implementation choices, and how the components work together"
-}`;
+  "html": "Complete HTML code with semantic structure and helpful comments",
+  "css": "Complete CSS code with responsive design and clear organization",
+  "js": "Complete JavaScript code with proper error handling and readability",
+  "explanation": "Detailed explanation of your implementation approach, key decisions, and how components work together"
+}
+
+Make your response educational, thoughtful, and practical. Show your reasoning process clearly.`;
 
       const request = {
         model: this.model,
@@ -104,9 +106,65 @@ You ALWAYS provide your responses in JSON format with the following structure:
     }
   }
   
+  private isSimpleGreeting(prompt: string): boolean {
+    const simplifiedPrompt = prompt.toLowerCase().trim();
+    const greetings = [
+      "hello", "hi", "hey", "greetings", "howdy", 
+      "what's up", "whats up", "sup", "yo", 
+      "good morning", "good afternoon", "good evening"
+    ];
+    
+    return greetings.some(greeting => 
+      simplifiedPrompt === greeting || 
+      simplifiedPrompt.startsWith(`${greeting} `) || 
+      simplifiedPrompt.startsWith(`${greeting},`)
+    );
+  }
+  
+  private handleSimpleGreeting(prompt: string, history: Array<{role: string, content: string}>): AIServiceResponse {
+    const isFirstMessage = history.filter(msg => msg.role === "user").length === 0;
+    
+    let greeting = "Hello! I'm WebCraft AI, your full-stack web development assistant. ";
+    
+    if (prompt.toLowerCase().includes("morning")) {
+      greeting = "Good morning! I'm WebCraft AI, ready to help with your web development projects. ";
+    } else if (prompt.toLowerCase().includes("afternoon")) {
+      greeting = "Good afternoon! I'm WebCraft AI, excited to assist with your web development needs. ";
+    } else if (prompt.toLowerCase().includes("evening")) {
+      greeting = "Good evening! I'm WebCraft AI, here to help with your web development tasks. ";
+    }
+    
+    let message = "";
+    
+    if (isFirstMessage) {
+      message = `${greeting}I can help you build amazing web applications by providing both guidance and code. What would you like to create today? You can describe a project, ask for specific features, or let me know if you have any questions about web development.`;
+    } else {
+      message = `${greeting}I'm here to continue helping with your web development project. What would you like to work on next?`;
+    }
+    
+    return {
+      success: true,
+      data: {
+        code: {
+          html: "",
+          css: "",
+          js: ""
+        },
+        explanation: message
+      }
+    };
+  }
+  
   private parseResponse(response: PerplexityResponse): AIServiceResponse {
     try {
       const content = response.choices[0]?.message?.content || "";
+      
+      // Extract thinking process
+      let thinkingProcess = "";
+      const thinkingMatch = content.match(/Thinking:([\s\S]*?)(?=\{|\`\`\`|HTML:|CSS:|JS:|<html>|$)/i);
+      if (thinkingMatch) {
+        thinkingProcess = thinkingMatch[1].trim();
+      }
       
       // First try to extract JSON
       try {
@@ -122,7 +180,9 @@ You ALWAYS provide your responses in JSON format with the following structure:
                 css: parsed.css || "",
                 js: parsed.js || ""
               },
-              explanation: parsed.explanation || "Generated with Perplexity AI"
+              explanation: thinkingProcess 
+                ? `${thinkingProcess}\n\n${parsed.explanation || "Generated with Perplexity AI"}` 
+                : (parsed.explanation || "Generated with Perplexity AI")
             }
           };
         }
@@ -135,6 +195,14 @@ You ALWAYS provide your responses in JSON format with the following structure:
       const cssMatch = content.match(/```css([\s\S]*?)```/);
       const jsMatch = content.match(/```js|```javascript([\s\S]*?)```/);
       
+      // Extract explanation by removing code blocks
+      let explanation = content.replace(/```html[\s\S]*?```/g, "")
+                     .replace(/```css[\s\S]*?```/g, "")
+                     .replace(/```js[\s\S]*?```/g, "")
+                     .replace(/```javascript[\s\S]*?```/g, "")
+                     .replace(/Thinking:[\s\S]*?(?=HTML:|CSS:|JS:|<html>|$)/i, "")
+                     .trim();
+      
       if (htmlMatch || cssMatch || jsMatch) {
         return {
           success: true,
@@ -144,12 +212,12 @@ You ALWAYS provide your responses in JSON format with the following structure:
               css: cssMatch ? cssMatch[1].trim() : "/* Generated styles */",
               js: jsMatch ? jsMatch[1].trim() : "// Generated script"
             },
-            explanation: "Generated based on AI interpretation"
+            explanation: thinkingProcess ? `${thinkingProcess}\n\n${explanation}` : explanation
           }
         };
       }
       
-      // If no structured content found, try to extract explanation at least
+      // If no structured content found, use the entire content
       return {
         success: true,
         data: {
@@ -158,7 +226,7 @@ You ALWAYS provide your responses in JSON format with the following structure:
             css: "/* Default styles */",
             js: "// Default script"
           },
-          explanation: content || "Generated with Perplexity AI"
+          explanation: thinkingProcess ? `${thinkingProcess}\n\n${explanation}` : content
         }
       };
     } catch (error) {

@@ -49,27 +49,47 @@ export class HuggingFaceClient extends AIClient {
   
   private parseResponse(data: any): AIServiceResponse {
     try {
+      // First show the AI's thinking process
+      let thinkingProcess = "";
+      const thinkingMatch = data.generated_text?.match(/Thinking:([\s\S]*?)(?=HTML:|CSS:|JS:|<html>|```html|$)/i);
+      if (thinkingMatch) {
+        thinkingProcess = thinkingMatch[1].trim();
+      }
+      
       // Try to find and parse JSON from the response
       const jsonMatch = data.generated_text?.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        return {
-          success: true,
-          data: {
-            code: {
-              html: parsed.html || "",
-              css: parsed.css || "",
-              js: parsed.js || ""
-            },
-            explanation: parsed.explanation || "Generated with AI"
-          }
-        };
+        try {
+          const parsed = JSON.parse(jsonMatch[0]);
+          return {
+            success: true,
+            data: {
+              code: {
+                html: parsed.html || "",
+                css: parsed.css || "",
+                js: parsed.js || ""
+              },
+              explanation: thinkingProcess ? `${thinkingProcess}\n\n${parsed.explanation || "Generated with AI"}` : (parsed.explanation || "Generated with AI")
+            }
+          };
+        } catch (e) {
+          // JSON parsing failed, continue to code block extraction
+        }
       }
       
-      // Simple fallback: try to extract code blocks
+      // Extract code blocks
       const htmlMatch = data.generated_text?.match(/```html([\s\S]*?)```/);
       const cssMatch = data.generated_text?.match(/```css([\s\S]*?)```/);
-      const jsMatch = data.generated_text?.match(/```js([\s\S]*?)```/);
+      const jsMatch = data.generated_text?.match(/```js|```javascript([\s\S]*?)```/);
+      
+      // Extract explanation
+      let explanation = data.generated_text || "Generated based on AI interpretation";
+      
+      // Clean up the explanation by removing code blocks
+      explanation = explanation.replace(/```html[\s\S]*?```/g, "")
+                     .replace(/```css[\s\S]*?```/g, "")
+                     .replace(/```js[\s\S]*?```/g, "")
+                     .replace(/```javascript[\s\S]*?```/g, "");
       
       if (htmlMatch || cssMatch || jsMatch) {
         return {
@@ -80,12 +100,22 @@ export class HuggingFaceClient extends AIClient {
               css: cssMatch ? cssMatch[1].trim() : "/* Generated styles */",
               js: jsMatch ? jsMatch[1].trim() : "// Generated script"
             },
-            explanation: "Generated based on AI interpretation"
+            explanation: thinkingProcess ? `${thinkingProcess}\n\n${explanation}` : explanation
           }
         };
       }
       
-      return { success: false, error: "Failed to extract code from response" };
+      return {
+        success: true,
+        data: {
+          code: {
+            html: "<div>Generated content</div>",
+            css: "/* Generated styles */",
+            js: "// Generated script"
+          },
+          explanation: thinkingProcess ? `${thinkingProcess}\n\n${explanation}` : explanation
+        }
+      };
     } catch (error) {
       return { success: false, error: "Error parsing API response" };
     }
@@ -93,36 +123,32 @@ export class HuggingFaceClient extends AIClient {
   
   private createEnhancedPrompt(userPrompt: string, history: Array<{role: string, content: string}>) {
     return `
-You are WebCraft AI, an expert web development assistant. Your responses are thoughtful, detailed, and helpful.
-You approach problems step-by-step and explain your reasoning clearly.
+${this.createEnhancedSystemPrompt()}
 
-Based on this request, generate clean, modern code for a web page:
+I want you to approach this web development request step by step:
 
-${userPrompt}
+1. First, share your thinking process under a "Thinking:" section. Analyze the request, consider different approaches, and explain your reasoning.
 
-${history.length > 0 ? `Previous conversation context:\n${this.formatChatHistory(history)}` : ""}
+2. Then implement your solution with well-commented code blocks:
 
-Please respond with:
-1. A thoughtful analysis of what's being requested
-2. Your implementation approach
-3. Code that meets the requirements
-
-Format your answer as:
 \`\`\`html
-<html>...</html>
+<!-- Your HTML code with comments explaining structure -->
 \`\`\`
 
 \`\`\`css
-/* styles with responsive design */
+/* Your CSS code with comments explaining styling decisions */
 \`\`\`
 
 \`\`\`js
-// well-documented scripts
+// Your JavaScript code with comments explaining logic
 \`\`\`
 
-Explanation: Provide a detailed explanation that covers your approach, key decisions, and how the code works
+3. Finally, provide a detailed explanation of your implementation, highlighting key decisions and how different parts work together.
 
-Focus on creating responsive, accessible, and maintainable code with best practices.
+USER REQUEST:
+${userPrompt}
+
+${history.length > 0 ? `CONVERSATION HISTORY:\n${this.formatChatHistory(history)}` : ""}
 `;
   }
 }

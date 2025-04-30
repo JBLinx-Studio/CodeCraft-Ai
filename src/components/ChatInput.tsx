@@ -32,8 +32,11 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <div className="relative">
         <Textarea
-          placeholder="Describe the web app you want to create..."
-          className="min-h-[100px] pr-10 resize-none overflow-auto"
+          placeholder={isProcessing ? "Generating response..." : "Describe the web app you want to create..."}
+          className={cn(
+            "min-h-[100px] pr-10 resize-none overflow-auto",
+            isProcessing && "bg-gray-50"
+          )}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -44,15 +47,18 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
           size="icon"
           className={cn(
             "absolute bottom-2 right-2 rounded-full h-8 w-8",
-            isProcessing && "opacity-50 cursor-not-allowed"
+            isProcessing ? "opacity-50 cursor-not-allowed bg-gray-400" : ""
           )}
           disabled={isProcessing || !message.trim()}
         >
           <SendIcon className="h-4 w-4" />
         </Button>
       </div>
-      <div className="text-xs text-muted-foreground">
-        Powered by Hugging Face Inference API • Free to use
+      <div className="text-xs text-muted-foreground flex justify-between items-center">
+        <span>Powered by AI • {isProcessing ? "Generating response..." : "Ready"}</span>
+        <span className="text-xs">
+          {message.length > 0 ? `${message.length} characters` : ""}
+        </span>
       </div>
     </form>
   );

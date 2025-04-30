@@ -21,7 +21,7 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
     {
       id: "system-1",
       role: "assistant",
-      content: "Hello! I'm WebCraft AI. Describe the web application you want to create and I'll help you build it. You can ask for specific features, layouts, or functionality.",
+      content: "Hello! I'm WebCraft AI. I can help you build amazing web applications. Describe what you want to create, and I'll generate the code for you. You can request specific features, layouts, or functionality.",
       timestamp: Date.now(),
     },
   ]);
@@ -54,8 +54,32 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
   const handleSendMessage = async (content: string) => {
     addMessage("user", content);
     
+    if (isProcessing) {
+      return;
+    }
+    
+    // For simple greetings, show a thinking message
+    const simplifiedContent = content.toLowerCase().trim();
+    const isSimpleGreeting = ["hello", "hi", "hey", "greetings"].includes(simplifiedContent);
+    
+    if (!isSimpleGreeting) {
+      // Add a "thinking" message for more complex requests
+      const thinkingId = nanoid();
+      setMessages((prev) => [...prev, {
+        id: thinkingId,
+        role: "assistant",
+        content: "I'm thinking about how to implement this...",
+        timestamp: Date.now(),
+      }]);
+    }
+    
     try {
       const response = await generateCode(content);
+      
+      // Remove the thinking message if it exists
+      if (!isSimpleGreeting) {
+        setMessages(prev => prev.filter(msg => msg.content !== "I'm thinking about how to implement this..."));
+      }
       
       if (response.error) {
         addMessage("assistant", `I encountered an error: ${response.error}. Please try again with a different request.`);
@@ -68,16 +92,21 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
       }
       
       const { html = "", css = "", js = "" } = response.code;
-      onCodeGenerated(html, css, js);
       
-      let responseMessage = "I've created a web app based on your description.";
-      if (response.explanation) {
-        responseMessage += `\n\n${response.explanation}`;
+      // Only update the preview if code was actually generated
+      if (html || css || js) {
+        onCodeGenerated(html, css, js);
       }
       
+      // Add the AI's response message
+      let responseMessage = response.explanation || "I've created a web app based on your description.";
       addMessage("assistant", responseMessage);
     } catch (error) {
       console.error("Error generating code:", error);
+      
+      // Remove the thinking message if it exists
+      setMessages(prev => prev.filter(msg => msg.content !== "I'm thinking about how to implement this..."));
+      
       addMessage("assistant", "I'm having trouble generating code right now. Please try again later.");
       toast({
         title: "Error",
@@ -111,7 +140,7 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center px-4 py-2">
-        <h2 className="text-lg font-medium">
+        <h2 className="text-lg font-medium flex items-center">
           Chat
           {usingFreeAPI && (
             <span className="ml-2 text-xs font-normal text-amber-600 bg-amber-50 px-2 py-0.5 rounded">Free API Mode</span>
