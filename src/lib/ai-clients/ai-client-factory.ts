@@ -17,7 +17,8 @@ export class AIClientFactory {
     const { apiKey, provider, modelType } = options;
     
     // If using free API, automatically switch to the FreeAPIClient
-    if (apiKey === FREE_API_KEY) {
+    if (provider === "FREE" || apiKey === FREE_API_KEY) {
+      console.log("Using free API mode");
       return new FreeAPIClient({ apiKey: FREE_API_KEY });
     }
     
@@ -37,8 +38,6 @@ export class AIClientFactory {
           apiKey, 
           model: modelType as keyof typeof PERPLEXITY_MODELS 
         });
-      case "FREE":
-        return new FreeAPIClient({ apiKey: FREE_API_KEY });
       default:
         throw new Error(`Unsupported AI provider: ${provider}`);
     }

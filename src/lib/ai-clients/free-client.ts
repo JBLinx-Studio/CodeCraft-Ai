@@ -1,7 +1,7 @@
 
 import { AIClient, AIClientOptions, AIRequestParams } from "./base-client";
 import { AIServiceResponse } from "@/types";
-import { smartFallbackGenerator } from "@/lib/template-generator";
+import { extractCodeBlocks } from "../utils";
 
 export interface FreeClientOptions extends AIClientOptions {
   model?: string;
@@ -9,47 +9,105 @@ export interface FreeClientOptions extends AIClientOptions {
 
 export class FreeAPIClient extends AIClient {
   private model: string;
+  private isProcessingRequest: boolean = false;
   
   constructor(options: FreeClientOptions) {
     super(options);
-    this.model = options.model || "free-test";
+    this.model = options.model || "meta-llama/Meta-Llama-3-8B-Instruct";
   }
   
   async generateResponse(params: AIRequestParams): Promise<AIServiceResponse> {
     try {
       const { prompt, chatHistory } = params;
+      this.isProcessingRequest = true;
       
-      // Check if this is a conversation starter or greeting
+      // Check if this is a simple conversation starter (greeting)
       const simplifiedPrompt = prompt.toLowerCase().trim();
       if (this.isSimpleConversation(simplifiedPrompt)) {
         return this.handleConversation(simplifiedPrompt, chatHistory);
       }
       
-      // For more complex requests, show a thinking process first
-      const thinkingResponse = this.generateThinkingProcess(prompt, chatHistory);
+      // Create a conversation-style prompt with history context
+      const messages = this.formatMessagesForLLM(prompt, chatHistory);
       
-      // Use the template generator system for code generation
-      const response = await smartFallbackGenerator(prompt, chatHistory);
+      try {
+        // Try Hugging Face Inference API (free tier)
+        const response = await this.callHuggingFaceAPI(messages);
+        if (response && response.success) {
+          return response;
+        }
+      } catch (error) {
+        console.error("Error with HuggingFace API:", error);
+        // Fall back to local processing if API fails
+      }
       
-      // Enhance the response with better explanations and thinking process
-      const enhancedExplanation = `${thinkingResponse}\n\n${this.enhanceExplanation(prompt, response.explanation || "")}`;
+      // Fallback: Create a more thoughtful response locally
+      return this.createLocalResponse(prompt, chatHistory);
+    } catch (error) {
+      console.error("FreeAPIClient error:", error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : "Unknown error occurred in Free API mode" 
+      };
+    } finally {
+      this.isProcessingRequest = false;
+    }
+  }
+  
+  private async callHuggingFaceAPI(messages: any[]): Promise<AIServiceResponse> {
+    try {
+      // Format the prompt for the Hugging Face API
+      const formattedMessages = messages.map(msg => {
+        if (msg.role === "system") return `<|system|>\n${msg.content}\n`;
+        if (msg.role === "user") return `<|user|>\n${msg.content}\n`;
+        if (msg.role === "assistant") return `<|assistant|>\n${msg.content}\n`;
+        return `${msg.role}: ${msg.content}\n`;
+      }).join("");
+      
+      const finalPrompt = `${formattedMessages}<|assistant|>\n`;
+      
+      // Call the Hugging Face Inference API (free tier)
+      const response = await fetch("https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputs: finalPrompt,
+          parameters: {
+            max_new_tokens: 1024,
+            temperature: 0.7,
+            top_p: 0.9,
+            do_sample: true,
+            return_full_text: false
+          }
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Hugging Face API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const generatedText = data[0]?.generated_text || "";
+      
+      // Extract any code blocks from the response
+      const { code, explanation } = extractCodeBlocks(generatedText);
       
       return {
         success: true,
         data: {
           code: {
-            html: response.code.html || "",
-            css: response.code.css || "",
-            js: response.code.js || ""
+            html: code.html || "",
+            css: code.css || "",
+            js: code.js || ""
           },
-          explanation: enhancedExplanation
+          explanation: explanation || generatedText
         }
       };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : "Unknown error occurred in Free API mode" 
-      };
+      console.error("Error calling Hugging Face API:", error);
+      throw error;
     }
   }
   
@@ -122,60 +180,126 @@ export class FreeAPIClient extends AIClient {
     };
   }
   
-  private generateThinkingProcess(prompt: string, history: Array<{role: string, content: string}>): string {
-    // Create a more thoughtful and dynamic thinking process
-    const thinkingSteps = ["I'm analyzing your request to build the best solution..."];
+  private formatMessagesForLLM(prompt: string, history: Array<{role: string, content: string}>): any[] {
+    const messages = [];
     
-    // Add context from history
-    if (history.length > 0) {
-      const recentHistory = history.slice(-3);
-      thinkingSteps.push("Based on our conversation so far, I'm considering how this new request fits with what we've discussed previously.");
+    // Add system prompt
+    messages.push({
+      role: "system",
+      content: `${this.createEnhancedSystemPrompt()}
+      
+When asked to create web applications:
+1. First analyze the request and show your reasoning.
+2. Generate HTML, CSS, and JavaScript code wrapped in code blocks (e.g., \`\`\`html, \`\`\`css, \`\`\`js).
+3. Provide clear explanations for your implementation choices.
+4. Make sure all code is complete and works together.
+
+If the user doesn't specifically request code, engage in a helpful conversation about web development topics. If they greet you, respond in a friendly, conversational manner.`
+    });
+    
+    // Add conversation history (limited to last 10 messages)
+    const recentHistory = history.slice(-10);
+    for (const msg of recentHistory) {
+      messages.push({
+        role: msg.role === "user" ? "user" : "assistant",
+        content: msg.content
+      });
     }
     
-    // Add specific thinking steps based on prompt keywords
-    if (prompt.toLowerCase().includes("landing") || prompt.toLowerCase().includes("home page")) {
-      thinkingSteps.push("You're asking about a landing page. A good landing page needs:\n- An engaging hero section with a clear value proposition\n- Well-structured content sections that tell your story\n- Strategic call-to-action elements\n- Responsive design that works on all devices");
-    }
+    // Add the current prompt
+    messages.push({
+      role: "user",
+      content: prompt
+    });
     
-    if (prompt.toLowerCase().includes("dashboard")) {
-      thinkingSteps.push("This looks like a dashboard project. When building dashboards, I need to consider:\n- Information hierarchy and organization\n- Data visualization components that present information clearly\n- User interaction patterns for filtering and exploring data\n- Layout considerations for different screen sizes");
-    }
-    
-    if (prompt.toLowerCase().includes("form") || prompt.toLowerCase().includes("contact")) {
-      thinkingSteps.push("You need a form implementation. Important considerations include:\n- Input validation and user feedback\n- Accessible form design practices\n- Logical tab order and keyboard navigation\n- Appropriate input types and error handling");
-    }
-    
-    if (prompt.toLowerCase().includes("responsive")) {
-      thinkingSteps.push("Responsiveness is a key requirement. I'll approach this with:\n- Mobile-first design principles\n- Fluid layouts using Flexbox and/or CSS Grid\n- Strategic breakpoints for different device sizes\n- Responsive typography and image handling");
-    }
-    
-    if (prompt.toLowerCase().includes("api") || prompt.toLowerCase().includes("data")) {
-      thinkingSteps.push("This involves data or API integration. I need to consider:\n- Fetch or Axios for API requests\n- State management for loading, error, and success states\n- Proper error handling and user feedback\n- Data transformation and presentation");
-    }
-    
-    // Add general closing thought
-    thinkingSteps.push("Let me create a solution that's well-structured, maintainable, and follows modern best practices.");
-    
-    return thinkingSteps.join("\n\n");
+    return messages;
   }
   
-  private enhanceExplanation(prompt: string, originalExplanation: string): string {
-    // Add more detailed implementation explanations if the original is too brief
-    let enhancedExplanation = originalExplanation;
+  private createLocalResponse(prompt: string, history: Array<{role: string, content: string}>): AIServiceResponse {
+    // Generate a thoughtful but local response when APIs fail
+    const thinkingSteps = this.generateThinkingProcess(prompt);
     
-    if (enhancedExplanation.length < 100) {
-      enhancedExplanation = `Based on your request for "${prompt.substring(0, 50)}...", I've created a web application solution.
-      
-Here's what I've implemented:
-
-1. Created a responsive HTML structure with semantic markup for better accessibility and SEO
-2. Added modern CSS styling using Tailwind utility classes for efficient styling
-3. Implemented JavaScript functionality to handle user interactions and data management
-4. Ensured the design works across different device sizes
-
-The code follows modern web development best practices and provides a solid foundation that you can further customize to your specific needs.`;
+    // Determine if this looks like a code generation request
+    const isCodeRequest = this.seemsLikeCodeRequest(prompt);
+    
+    if (isCodeRequest) {
+      // For code requests, provide a helpful explanation but no actual code
+      return {
+        success: true,
+        data: {
+          code: {
+            html: "<div class=\"container\">\n  <h1>Hello World</h1>\n  <p>This is a simple example.</p>\n</div>",
+            css: "body {\n  font-family: 'Arial', sans-serif;\n}\n\n.container {\n  max-width: 800px;\n  margin: 0 auto;\n  padding: 2rem;\n}",
+            js: "// Simple interactive functionality\ndocument.addEventListener('DOMContentLoaded', () => {\n  console.log('App initialized!');\n});"
+          },
+          explanation: `${thinkingSteps}\n\nI've created a simple starter template based on your request. This is just a basic example - to get more advanced functionality, you might want to use your own API key for more powerful AI code generation.`
+        }
+      };
+    } else {
+      // For conversation, just return the thinking process
+      return {
+        success: true,
+        data: {
+          code: {
+            html: "",
+            css: "",
+            js: ""
+          },
+          explanation: `Let me think about this...\n\n${thinkingSteps}`
+        }
+      };
+    }
+  }
+  
+  private generateThinkingProcess(prompt: string): string {
+    // Create a more thoughtful and dynamic thinking process
+    const lowerPrompt = prompt.toLowerCase();
+    let thoughts = [];
+    
+    // Add context-specific thoughts based on keywords
+    if (lowerPrompt.includes("react") || lowerPrompt.includes("component")) {
+      thoughts.push("You're asking about React components. React is a popular JavaScript library for building user interfaces, especially single-page applications.");
+      thoughts.push("When designing React components, it's important to consider:");
+      thoughts.push("- Component reusability and composition");
+      thoughts.push("- State management (local state, context, or external libraries)");
+      thoughts.push("- Props and their typings with TypeScript");
+      thoughts.push("- Side effects with useEffect and cleanup functions");
+    } else if (lowerPrompt.includes("api") || lowerPrompt.includes("fetch")) {
+      thoughts.push("I see you're interested in working with APIs. Let me share some thoughts:");
+      thoughts.push("- Modern approaches use fetch or libraries like axios");
+      thoughts.push("- Error handling is crucial for robust applications");
+      thoughts.push("- Consider loading states and user feedback");
+      thoughts.push("- React Query can simplify data fetching and caching");
+    } else if (lowerPrompt.includes("css") || lowerPrompt.includes("style") || lowerPrompt.includes("design")) {
+      thoughts.push("You're asking about styling and design. Here are my thoughts:");
+      thoughts.push("- Modern CSS features like flexbox and grid are powerful for layouts");
+      thoughts.push("- Tailwind CSS provides utility classes for rapid development");
+      thoughts.push("- CSS variables (custom properties) enable theming and consistency");
+      thoughts.push("- Responsive design should be considered from the beginning");
+    } else if (lowerPrompt.includes("performance") || lowerPrompt.includes("optimize")) {
+      thoughts.push("Performance optimization is an important topic. Some key considerations:");
+      thoughts.push("- Minimize bundle size with code splitting and tree shaking");
+      thoughts.push("- Optimize rendering with memoization (useMemo, useCallback)");
+      thoughts.push("- Lazy loading for components and images");
+      thoughts.push("- Virtualization for long lists with libraries like react-window");
+    } else {
+      thoughts.push("I'm analyzing your request about web development.");
+      thoughts.push("Let me consider what would be most helpful for your needs.");
+      thoughts.push("Web development involves many different technologies and approaches.");
+      thoughts.push("I'll try to provide guidance that's both practical and educational.");
     }
     
-    return enhancedExplanation;
+    return thoughts.join("\n\n");
+  }
+  
+  private seemsLikeCodeRequest(prompt: string): boolean {
+    const codeKeywords = [
+      "create", "build", "make", "generate", "code", "implement",
+      "develop", "app", "application", "website", "component", "page",
+      "feature", "function", "html", "css", "javascript", "react"
+    ];
+    
+    const lowerPrompt = prompt.toLowerCase();
+    return codeKeywords.some(keyword => lowerPrompt.includes(keyword));
   }
 }

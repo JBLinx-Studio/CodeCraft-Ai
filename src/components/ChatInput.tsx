@@ -12,7 +12,8 @@ interface ChatInputProps {
 
 export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProps) {
   const [message, setMessage] = useState("");
-
+  const [typingIndicator, setTypingIndicator] = useState("");
+  
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (message.trim() && !isProcessing) {
@@ -28,11 +29,29 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
     }
   };
 
+  // Simulate the AI thinking with a typing indicator when processing
+  React.useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    if (isProcessing) {
+      const thinkingStates = ["", ".", "..", "..."];
+      let i = 0;
+      interval = setInterval(() => {
+        setTypingIndicator(thinkingStates[i]);
+        i = (i + 1) % thinkingStates.length;
+      }, 400);
+    } else {
+      setTypingIndicator("");
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isProcessing]);
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <div className="relative">
         <Textarea
-          placeholder={isProcessing ? "Generating response..." : "Ask me anything about web development..."}
+          placeholder={isProcessing ? "AI is thinking" + typingIndicator : "Ask me anything about web development..."}
           className={cn(
             "min-h-[100px] pr-10 resize-none overflow-auto",
             isProcessing && "bg-gray-50"
@@ -55,7 +74,9 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
         </Button>
       </div>
       <div className="text-xs text-muted-foreground flex justify-between items-center">
-        <span>Powered by AI • {isProcessing ? "Thinking..." : "Ready"}</span>
+        <span>{isProcessing ? 
+          <span className="text-amber-600">AI is thinking{typingIndicator}</span> : 
+          "Powered by AI • Ready"}</span>
         <span className="text-xs">
           {message.length > 0 ? `${message.length} characters` : ""}
         </span>
