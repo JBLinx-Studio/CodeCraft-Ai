@@ -77,7 +77,7 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
               key={index}
               type="button"
               onClick={() => handleSuggestion(prompt)}
-              className="text-xs px-3 py-1.5 bg-primary/5 hover:bg-primary/10 text-primary-foreground rounded-full transition-colors"
+              className="text-xs px-3 py-1.5 bg-glass bg-white/10 hover:bg-white/20 border border-white/30 text-primary/80 rounded-full transition-colors"
             >
               {prompt}
             </button>
@@ -88,7 +88,7 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
         <Textarea
           placeholder={isProcessing ? "AI is thinking" + typingIndicator : "Ask me anything about web development..."}
           className={cn(
-            "min-h-[100px] pr-14 resize-none overflow-auto rounded-xl border-muted focus-visible:ring-1 focus-visible:ring-primary/50",
+            "min-h-[100px] pr-14 resize-none overflow-auto rounded-xl border-muted focus-visible:ring-1 focus-visible:ring-primary/50 glass",
             isProcessing && "bg-muted/30 text-muted-foreground"
           )}
           value={message}
@@ -107,7 +107,7 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
                   isProcessing 
                     ? "bg-muted cursor-not-allowed" 
                     : message.trim() 
-                      ? "bg-gradient-to-r from-theme-blue to-theme-purple hover:opacity-90" 
+                      ? "bg-gradient-to-r from-theme-blue to-theme-purple hover:opacity-90 shadow-neon" 
                       : "bg-primary/60 cursor-not-allowed"
                 )}
                 disabled={isProcessing || !message.trim()}
@@ -134,7 +134,7 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
             </span> : 
             <span className="flex items-center gap-1">
               <Wand2 className="h-3 w-3 text-theme-purple animate-pulse-slow" /> 
-              Powered by AI • Ready
+              <span className="bg-gradient-to-r from-theme-purple to-theme-blue bg-clip-text text-transparent font-medium">Powered by AI</span> • Ready
             </span>
           }
         </span>

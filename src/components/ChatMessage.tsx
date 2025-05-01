@@ -33,14 +33,14 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         "flex gap-3 p-4 rounded-xl message-appear",
         isUser 
           ? "bg-primary/5 border border-primary/10 hover:border-primary/20 transition-all" 
-          : "bg-card shadow-sm hover:shadow-md transition-all"
+          : "frost-panel hover:shadow-xl transition-all"
       )}
     >
       <Avatar className={cn(
-        "h-8 w-8 rounded-full overflow-hidden border-2",
+        "h-10 w-10 rounded-xl overflow-hidden border-2",
         isUser 
           ? "border-primary/30 bg-primary/5" 
-          : "border-accent/30 bg-gradient-animation"
+          : "border-theme-purple/30 bg-gradient-animation"
       )}>
         <AvatarFallback className={cn(
           "text-xs font-medium",
@@ -49,22 +49,22 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           {isUser ? (
             <User className="h-4 w-4" />
           ) : (
-            <Bot className="h-4 w-4" />
+            <Bot className="h-5 w-5" />
           )}
         </AvatarFallback>
         {!isUser && (
           <AvatarImage src="/assets/assistant-avatar.png" alt="Assistant" />
         )}
       </Avatar>
-      <div className="flex-1 space-y-1.5 overflow-hidden">
+      <div className="flex-1 space-y-2 overflow-hidden">
         <div className="flex items-center justify-between">
           <span className={cn(
             "font-medium text-sm flex items-center gap-2",
-            isUser ? "text-primary-foreground" : "text-foreground"
+            isUser ? "text-primary" : "bg-gradient-to-r from-theme-purple to-theme-blue bg-clip-text text-transparent"
           )}>
             {isUser ? "You" : (
               <>
-                <span>WebCraft AI</span>
+                <span className="font-heading font-semibold">WebCraft AI</span>
                 <div className="tag tag-purple text-[10px] py-0">Assistant</div>
               </>
             )}
@@ -73,7 +73,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 hover:bg-background hover:text-primary transition-opacity"
+              className="h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 hover:bg-white/30 hover:text-primary transition-opacity"
               onClick={copyText}
             >
               {copied ? (
@@ -87,7 +87,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             </span>
           </div>
         </div>
-        <div className="text-sm whitespace-pre-wrap">{message.content}</div>
+        <div className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</div>
       </div>
     </div>
   );

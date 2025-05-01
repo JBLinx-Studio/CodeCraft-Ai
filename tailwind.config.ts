@@ -19,9 +19,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Poppins', 'Inter', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
-        display: ['Poppins', 'sans-serif'],
+        display: ['Playfair Display', 'serif'],
+        heading: ['Montserrat', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -65,6 +66,15 @@ export default {
           green: "#10B981",
           yellow: "#FBBF24",
           red: "#EF4444",
+          teal: "#14B8A6",
+          cyan: "#06B6D4",
+          indigo: "#6366F1",
+          violet: "#8B5CF6",
+          fuchsia: "#D946EF",
+          rose: "#F43F5E",
+          amber: "#F59E0B",
+          lime: "#84CC16",
+          emerald: "#10B981",
         },
         surface: {
           light: "#FFFFFF",
@@ -72,6 +82,11 @@ export default {
           hover: "#F3F4F6",
           dark: "#E5E7EB",
         },
+        glass: {
+          light: "rgba(255, 255, 255, 0.7)",
+          DEFAULT: "rgba(255, 255, 255, 0.3)",
+          dark: "rgba(0, 0, 0, 0.3)",
+        }
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -124,6 +139,29 @@ export default {
         'text-gradient': {
           '0%, 100%': { backgroundPosition: '0% 50%' },
           '50%': { backgroundPosition: '100% 50%' }
+        },
+        'float-slow': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-15px)' }
+        },
+        'breathe': {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.03)' }
+        },
+        'rotate-slow': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' }
+        },
+        'wave-motion': {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' }
+        },
+        'morph': {
+          '0%, 100%': { borderRadius: '60% 40% 30% 70%/60% 30% 70% 40%' },
+          '25%': { borderRadius: '30% 60% 70% 40%/50% 60% 30% 60%' },
+          '50%': { borderRadius: '40% 60% 30% 70%/30% 40% 70% 60%' },
+          '75%': { borderRadius: '60% 30% 70% 40%/60% 30% 60% 40%' }
         }
       },
       animation: {
@@ -136,7 +174,12 @@ export default {
         'bounce-subtle': 'bounce-subtle 3s ease-in-out infinite',
         'spin-slow': 'spin-slow 10s linear infinite',
         'glow': 'glow 2s ease-in-out infinite',
-        'text-gradient': 'text-gradient 3s ease infinite'
+        'text-gradient': 'text-gradient 3s ease infinite',
+        'float-slow': 'float-slow 6s ease-in-out infinite',
+        'breathe': 'breathe 4s ease-in-out infinite',
+        'rotate-slow': 'rotate-slow 12s linear infinite',
+        'wave-motion': 'wave-motion 10s ease infinite',
+        'morph': 'morph 8s ease-in-out infinite',
       },
       boxShadow: {
         'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
@@ -144,13 +187,23 @@ export default {
         'card': '0 4px 20px -2px rgba(0, 0, 0, 0.08)',
         'button': '0 2px 5px rgba(0, 0, 0, 0.1)',
         'hover': '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
-        'feature': '0 25px 50px -12px rgba(0, 0, 0, 0.1)'
+        'feature': '0 25px 50px -12px rgba(0, 0, 0, 0.1)',
+        'glass': '0 4px 30px rgba(0, 0, 0, 0.1)',
+        'neon': '0 0 5px theme(colors.theme.purple), 0 0 20px theme(colors.theme.blue)',
+        '3d': '0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23)',
+        'inner-glow': 'inset 0 0 20px rgba(79, 70, 229, 0.4)'
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
         'gradient-noise': 'url("/assets/noise-pattern.png"), linear-gradient(var(--tw-gradient-stops))',
         'dotted-pattern': 'radial-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px)',
+        'gradient-candy': 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        'gradient-sunset': 'linear-gradient(to right, #ee9ca7, #ffdde1)',
+        'gradient-ocean': 'linear-gradient(to right, #243949, #517fa4)',
+        'gradient-royal': 'linear-gradient(to right, #141e30, #243b55)',
+        'gradient-cosmic': 'linear-gradient(to bottom, #0f2027, #203a43, #2c5364)',
+        'mesh-pattern': "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")"
       }
     }
   },
