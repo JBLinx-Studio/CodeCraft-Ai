@@ -2,8 +2,14 @@
 import React, { useState, FormEvent, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { SendIcon, Sparkles, Loader2 } from "lucide-react";
+import { SendIcon, Sparkles, Loader2, LightbulbIcon, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -13,6 +19,13 @@ interface ChatInputProps {
 export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [typingIndicator, setTypingIndicator] = useState("");
+  
+  const suggestionPrompts = [
+    "Create a landing page for a fitness app with a sign-up form",
+    "Build a todo app with local storage support",
+    "Design a responsive pricing table with three tiers",
+    "Make an image gallery with thumbnails and a lightbox effect"
+  ];
   
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -27,6 +40,10 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
       e.preventDefault();
       handleSubmit(e);
     }
+  };
+  
+  const handleSuggestion = (suggestion: string) => {
+    setMessage(suggestion);
   };
 
   // Simulate the AI thinking with a typing indicator when processing
@@ -49,6 +66,24 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      {!message && !isProcessing && (
+        <div className="flex flex-wrap gap-2 mb-1">
+          <p className="text-xs text-muted-foreground flex items-center mb-1 w-full">
+            <LightbulbIcon className="h-3 w-3 mr-1 text-theme-yellow" />
+            Try these example prompts:
+          </p>
+          {suggestionPrompts.map((prompt, index) => (
+            <button
+              key={index}
+              type="button"
+              onClick={() => handleSuggestion(prompt)}
+              className="text-xs px-3 py-1.5 bg-primary/5 hover:bg-primary/10 text-primary-foreground rounded-full transition-colors"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="relative">
         <Textarea
           placeholder={isProcessing ? "AI is thinking" + typingIndicator : "Ask me anything about web development..."}
@@ -61,25 +96,34 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
           onKeyDown={handleKeyDown}
           disabled={isProcessing}
         />
-        <Button
-          type="submit"
-          size="icon"
-          className={cn(
-            "absolute bottom-3 right-3 rounded-full h-8 w-8 flex items-center justify-center transition-all",
-            isProcessing 
-              ? "bg-muted cursor-not-allowed" 
-              : message.trim() 
-                ? "bg-primary hover:bg-primary/90" 
-                : "bg-primary/60 cursor-not-allowed"
-          )}
-          disabled={isProcessing || !message.trim()}
-        >
-          {isProcessing ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <SendIcon className="h-4 w-4" />
-          )}
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="submit"
+                size="icon"
+                className={cn(
+                  "absolute bottom-3 right-3 rounded-full h-8 w-8 flex items-center justify-center transition-all",
+                  isProcessing 
+                    ? "bg-muted cursor-not-allowed" 
+                    : message.trim() 
+                      ? "bg-gradient-to-r from-theme-blue to-theme-purple hover:opacity-90" 
+                      : "bg-primary/60 cursor-not-allowed"
+                )}
+                disabled={isProcessing || !message.trim()}
+              >
+                {isProcessing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <SendIcon className="h-4 w-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Send message</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
       <div className="text-xs text-muted-foreground flex justify-between items-center">
         <span className="flex items-center">
@@ -89,7 +133,7 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
               AI is thinking<span className="thinking-dots"></span>
             </span> : 
             <span className="flex items-center gap-1">
-              <Sparkles className="h-3 w-3 text-primary" /> 
+              <Wand2 className="h-3 w-3 text-theme-purple animate-pulse-slow" /> 
               Powered by AI • Ready
             </span>
           }

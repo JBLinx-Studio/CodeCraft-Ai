@@ -96,12 +96,39 @@
   animation: gradient-shift 15s ease infinite;
 }
 
+.bg-gradient-subtle {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+.bg-gradient-warm {
+  background: linear-gradient(60deg, #ff9a9e 0%, #fad0c4 100%);
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+.bg-gradient-cool {
+  background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
 .glass-effect {
   @apply backdrop-blur-md bg-white/80 dark:bg-black/40 border border-white/20 dark:border-white/10;
 }
 
+.neo-glass {
+  @apply backdrop-blur-md bg-white/90 dark:bg-black/60 border border-white/30 dark:border-white/10 shadow-soft;
+}
+
 .font-code {
   font-family: 'JetBrains Mono', monospace;
+}
+
+/* Text with gradient */
+.text-gradient {
+  @apply bg-gradient-to-r from-theme-blue to-theme-purple bg-clip-text text-transparent;
 }
 
 /* Card hover effects */
@@ -112,6 +139,26 @@
 .hover-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 20px -10px rgba(0, 0, 0, 0.1);
+}
+
+/* Button styles */
+.fancy-button {
+  @apply relative overflow-hidden bg-gradient-to-br from-theme-purple to-theme-blue text-white px-6 py-3 rounded-lg transition-all duration-300;
+}
+
+.fancy-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: 0.5s;
+}
+
+.fancy-button:hover::before {
+  left: 100%;
 }
 
 /* Message appear animation */
@@ -187,4 +234,122 @@
   100% {
     box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
   }
+}
+
+/* Feature card */
+.feature-card {
+  @apply p-6 bg-white rounded-2xl shadow-card transition-all duration-300 border border-border/50 hover:-translate-y-1 hover:shadow-hover;
+}
+
+/* Pattern backgrounds */
+.bg-dotted {
+  background-size: 20px 20px;
+  background-image: radial-gradient(circle, #8B5CF6 1px, transparent 1px);
+}
+
+/* Tag styles */
+.tag {
+  @apply inline-block px-3 py-1 text-xs font-medium rounded-full;
+}
+
+.tag-blue {
+  @apply bg-blue-100 text-blue-700;
+}
+
+.tag-purple {
+  @apply bg-purple-100 text-purple-700;
+}
+
+.tag-pink {
+  @apply bg-pink-100 text-pink-700;
+}
+
+.tag-green {
+  @apply bg-green-100 text-green-700;
+}
+
+.tag-yellow {
+  @apply bg-yellow-100 text-yellow-700;
+}
+
+/* Add a wavy divider */
+.divider-wave {
+  position: relative;
+  height: 70px;
+  overflow: hidden;
+}
+
+.divider-wave::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 20px;
+  background-size: 40px 100%;
+  background-image: 
+    radial-gradient(ellipse at bottom, transparent 0%, transparent 70%, white 70%);
+  background-position: 0 0;
+  background-repeat: repeat-x;
+  animation: wave 8s linear infinite;
+}
+
+@keyframes wave {
+  0% {
+    background-position-x: 0%;
+  }
+  100% {
+    background-position-x: 400px;
+  }
+}
+
+/* 3D Button Effect */
+.button-3d {
+  @apply relative overflow-hidden transition-all duration-200;
+  transform-style: preserve-3d;
+  transform: translateZ(0);
+}
+
+.button-3d:hover {
+  transform: translateY(-2px) translateZ(0);
+}
+
+.button-3d:active {
+  transform: translateY(1px) translateZ(0);
+}
+
+/* Dashboard card */
+.dashboard-card {
+  @apply relative p-5 rounded-xl bg-gradient-to-br from-white to-gray-50 shadow-lg overflow-hidden;
+}
+
+.dashboard-card::after {
+  content: "";
+  @apply absolute inset-0 bg-dotted-pattern opacity-5 pointer-events-none;
+  background-size: 20px 20px;
+}
+
+/* Icon container */
+.icon-container {
+  @apply flex items-center justify-center w-10 h-10 rounded-full;
+}
+
+.icon-blue {
+  @apply bg-blue-100 text-theme-blue;
+}
+
+.icon-purple {
+  @apply bg-purple-100 text-theme-purple;
+}
+
+.icon-pink {
+  @apply bg-pink-100 text-theme-pink;
+}
+
+.icon-orange {
+  @apply bg-orange-100 text-theme-orange;
+}
+
+.icon-green {
+  @apply bg-green-100 text-theme-green;
 }
