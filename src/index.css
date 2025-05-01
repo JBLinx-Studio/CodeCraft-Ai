@@ -206,12 +206,12 @@
 
 @keyframes glow {
   0%, 100% { 
-    boxShadow: '0 0 15px rgba(139, 92, 246, 0.3)',
-    opacity: 0.8
+    boxShadow: '0 0 15px rgba(139, 92, 246, 0.3)';
+    opacity: 0.8;
   }
   50% { 
-    boxShadow: '0 0 30px rgba(139, 92, 246, 0.6)', 
-    opacity: 1 
+    boxShadow: '0 0 30px rgba(139, 92, 246, 0.6)'; 
+    opacity: 1; 
   }
 }
 
@@ -757,31 +757,25 @@
   @apply bg-yellow-100 text-yellow-700;
 }
 
-/* Add a wavy divider */
-.divider-wave {
-  position: relative;
-  height: 70px;
-  overflow: hidden;
+/* Text with gradient */
+.text-gradient {
+  @apply bg-gradient-to-r from-theme-blue to-theme-purple bg-clip-text text-transparent;
 }
 
-.divider-wave::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 20px;
-  background-size: 40px 100%;
-  background-image: 
-    radial-gradient(ellipse at bottom, transparent 0%, transparent 70%, white 70%);
-  background-position: 0 0;
-  background-repeat: repeat-x;
-  animation: wave 8s linear infinite;
+/* Card hover effects */
+.hover-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-@keyframes wave {
-  0% {
-    background-position-x: 0%;
-  }
-  100% {
-    background-position-x:
+.hover-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px -10px rgba(0, 0, 0, 0.1);
+}
+
+/* Button styles */
+.fancy-button {
+  @apply relative overflow-hidden bg-gradient-to-br from-theme-purple to-theme-blue text-white px-6 py-3 rounded-lg transition-all duration-300;
+}
+
+.fancy-button::before {
+  content
