@@ -2,7 +2,7 @@
 import React, { useState, FormEvent, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { SendIcon } from "lucide-react";
+import { SendIcon, Sparkles, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
@@ -53,8 +53,8 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
         <Textarea
           placeholder={isProcessing ? "AI is thinking" + typingIndicator : "Ask me anything about web development..."}
           className={cn(
-            "min-h-[100px] pr-10 resize-none overflow-auto",
-            isProcessing && "bg-gray-50"
+            "min-h-[100px] pr-14 resize-none overflow-auto rounded-xl border-muted focus-visible:ring-1 focus-visible:ring-primary/50",
+            isProcessing && "bg-muted/30 text-muted-foreground"
           )}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
@@ -65,18 +65,35 @@ export default function ChatInput({ onSendMessage, isProcessing }: ChatInputProp
           type="submit"
           size="icon"
           className={cn(
-            "absolute bottom-2 right-2 rounded-full h-8 w-8",
-            isProcessing ? "opacity-50 cursor-not-allowed bg-gray-400" : ""
+            "absolute bottom-3 right-3 rounded-full h-8 w-8 flex items-center justify-center transition-all",
+            isProcessing 
+              ? "bg-muted cursor-not-allowed" 
+              : message.trim() 
+                ? "bg-primary hover:bg-primary/90" 
+                : "bg-primary/60 cursor-not-allowed"
           )}
           disabled={isProcessing || !message.trim()}
         >
-          <SendIcon className="h-4 w-4" />
+          {isProcessing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <SendIcon className="h-4 w-4" />
+          )}
         </Button>
       </div>
       <div className="text-xs text-muted-foreground flex justify-between items-center">
-        <span>{isProcessing ? 
-          <span className="text-amber-600">AI is thinking{typingIndicator}</span> : 
-          "Powered by AI • Ready"}</span>
+        <span className="flex items-center">
+          {isProcessing ? 
+            <span className="text-amber-600 flex items-center gap-1">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              AI is thinking<span className="thinking-dots"></span>
+            </span> : 
+            <span className="flex items-center gap-1">
+              <Sparkles className="h-3 w-3 text-primary" /> 
+              Powered by AI • Ready
+            </span>
+          }
+        </span>
         <span className="text-xs">
           {message.length > 0 ? `${message.length} characters` : ""}
         </span>
