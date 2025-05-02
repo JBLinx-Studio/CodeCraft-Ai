@@ -39,6 +39,13 @@
     --ring: 224 71% 4%;
 
     --radius: 0.75rem;
+    
+    /* Theme colors */
+    --theme-blue: 210 100% 50%;
+    --theme-green: 162 84% 44%;
+    --theme-teal: 174 84% 36%;
+    --theme-purple: 265 84% 62%;
+    --theme-yellow: 48 96% 53%;
   }
 
   .dark {
@@ -78,26 +85,31 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans transition-colors duration-300;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading tracking-tight;
   }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 /* Glass morphism effects */
 .glassmorphism {
-  @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg border border-white/20 dark:border-slate-700/20 shadow-glass;
+  @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg border border-white/20 dark:border-slate-700/20 shadow-lg;
 }
 
 .glassmorphism-card {
-  @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/30 shadow-card rounded-xl;
+  @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/30 shadow-xl rounded-xl;
 }
 
 .glassmorphism-navbar {
-  @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-white/20 dark:border-slate-700/20 shadow-sm;
+  @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-white/20 dark:border-slate-700/20 shadow-sm transition-all duration-300;
 }
 
 /* Code-like styles */
@@ -129,13 +141,13 @@
   @apply text-slate-500;
 }
 
-/* Modern UI Components */
+/* Enhanced UI Components */
 .modern-panel {
-  @apply bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-soft;
+  @apply bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg transition-all hover:shadow-xl duration-200;
 }
 
 .feature-icon {
-  @apply w-10 h-10 rounded-lg flex items-center justify-center;
+  @apply w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300;
 }
 
 .feature-icon-blue {
@@ -157,7 +169,7 @@
 
 .nav-link::after {
   content: '';
-  @apply absolute left-0 bottom-0 w-0 h-0.5 bg-theme-blue transition-all duration-300 ease-out opacity-0;
+  @apply absolute left-0 bottom-0 w-0 h-0.5 bg-gradient-to-r from-theme-blue to-theme-green transition-all duration-300 ease-out opacity-0;
 }
 
 .nav-link:hover::after {
@@ -165,7 +177,7 @@
 }
 
 .nav-link-active {
-  @apply text-theme-blue dark:text-theme-blue;
+  @apply text-theme-blue dark:text-theme-blue font-medium;
 }
 
 .nav-link-active::after {
@@ -198,6 +210,59 @@
   animation: slideRight 0.6s ease forwards;
 }
 
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Thinking dots animation */
+.thinking-dots::after {
+  content: '...';
+  display: inline-block;
+  animation: thinkingDots 1.5s infinite;
+  width: 12px;
+  text-align: left;
+}
+
+/* Shadow effects */
+.shadow-glow {
+  box-shadow: 0 0 25px rgba(10, 132, 255, 0.3);
+}
+
+.shadow-glow-sm {
+  box-shadow: 0 0 15px rgba(10, 132, 255, 0.2);
+}
+
+/* Gradient background animation */
+.bg-gradient-animation {
+  background: linear-gradient(-45deg, #0A84FF, #07C27F, #5856D6, #0A84FF);
+  background-size: 400% 400%;
+  animation: gradientBackground 15s ease infinite;
+}
+
+/* Frost panel with hover effect */
+.frost-panel {
+  @apply bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-white/20 dark:border-slate-700/30 rounded-xl transition-all duration-300;
+}
+
+.frost-panel:hover {
+  @apply border-white/40 dark:border-slate-700/50 bg-white/70 dark:bg-slate-900/70;
+}
+
+/* Tag styling */
+.tag {
+  @apply px-2 py-0.5 rounded-full text-xs font-medium;
+}
+
+.tag-purple {
+  @apply bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400;
+}
+
+/* Glass effect for buttons and inputs */
+.bg-glass {
+  @apply backdrop-blur-lg bg-white/10 dark:bg-slate-700/10 transition-all duration-300;
+}
+
+/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -211,6 +276,34 @@
 @keyframes slideRight {
   from { transform: translateX(-20px); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes thinkingDots {
+  0% { content: '.'; }
+  33% { content: '..'; }
+  66% { content: '...'; }
+  100% { content: '.'; }
+}
+
+@keyframes gradientBackground {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Message appear animation */
+.message-appear {
+  animation: messageAppear 0.3s ease forwards;
+}
+
+@keyframes messageAppear {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Scrollbar styling */
