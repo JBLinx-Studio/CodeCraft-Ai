@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Github, Code, Moon, Sun, Menu, ExternalLink } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useContext } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,29 +13,16 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
+import { ThemeContext } from "@/App";
 
 export default function Header() {
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    const savedTheme = localStorage.getItem("theme");
-    return (savedTheme as "light" | "dark") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-  });
-  
+  const { theme, setTheme } = useContext(ThemeContext);
   const location = useLocation();
   
-  useEffect(() => {
-    // Apply theme to document
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    // Save theme preference
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-  
   const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-    toast(`${theme === "light" ? "Dark" : "Light"} mode activated`, {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    toast(`${newTheme === "light" ? "Light" : "Dark"} mode activated`, {
       description: `Visual preference updated`,
       duration: 2000,
     });
