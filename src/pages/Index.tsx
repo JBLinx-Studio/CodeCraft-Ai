@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import { ChatPanel } from "@/components/ChatPanel";
@@ -7,7 +8,9 @@ import { Template } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Toaster } from "@/components/ui/toaster";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { Code, Zap, Layout } from "lucide-react";
+import Star from "@/components/Star";
 import CompanyBranding from "@/components/CompanyBranding";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
