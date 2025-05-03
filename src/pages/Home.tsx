@@ -1,6 +1,6 @@
 
 import Header from "@/components/Header";
-import { ChatPanel } from "@/components/ChatPanel"; // Changed to named import
+import { ChatPanel } from "@/components/ChatPanel";
 import PreviewPanel from "@/components/PreviewPanel";
 import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -24,12 +24,12 @@ const Home = () => {
       <Header />
       
       <main className="flex-1 mt-16 flex flex-col">
-        {/* Hero Section */}
+        {/* Hero Section with enhanced styling */}
         <section className="relative overflow-hidden py-20">
           <div className="absolute inset-0 bg-gradient-to-br from-theme-blue/5 to-theme-green/5"></div>
           <div className="container relative z-10 px-4">
             <div className="max-w-4xl mx-auto text-center">
-              <span className="inline-block px-3 py-1 mb-6 text-xs font-medium rounded-full bg-gradient-to-r from-theme-blue/20 to-theme-green/20 border border-theme-blue/10 text-theme-blue">
+              <span className="inline-block px-3 py-1 mb-6 text-xs font-medium rounded-full bg-gradient-to-r from-theme-blue/20 to-theme-green/20 border border-theme-blue/10 text-theme-blue animate-fade-in">
                 Enterprise AI Development Platform
               </span>
               
@@ -37,25 +37,25 @@ const Home = () => {
                 Build production-ready applications with AI
               </h1>
               
-              <p className="text-lg md:text-xl mb-8 text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
+              <p className="text-lg md:text-xl mb-8 text-slate-600 dark:text-slate-300 max-w-3xl mx-auto animate-slide-up">
                 Transform concepts into sophisticated web applications with our advanced AI engine.
                 Enterprise-grade solutions for modern development teams.
               </p>
               
               <div className="flex flex-wrap justify-center gap-4 mb-10">
-                <Button size="lg" className="gap-2 bg-gradient-to-r from-theme-blue to-theme-green hover:opacity-90 transition-opacity">
+                <Button size="lg" className="gap-2 bg-gradient-to-r from-theme-blue to-theme-green hover:opacity-90 transition-opacity shadow-lg">
                   Start Building Free
                   <Zap className="w-4 h-4" />
                 </Button>
-                <Button size="lg" variant="outline" className="gap-2">
+                <Button size="lg" variant="outline" className="gap-2 backdrop-blur-sm bg-white/10 dark:bg-slate-900/10 hover:bg-white/20 dark:hover:bg-slate-900/20">
                   View Demo
                   <Code className="w-4 h-4" />
                 </Button>
               </div>
               
-              <div className="flex flex-wrap justify-center gap-3 mb-8">
+              <div className="flex flex-wrap justify-center gap-3 mb-8 animate-fade-in">
                 {["React", "TypeScript", "Tailwind", "Full-stack", "API Integration"].map((tech, index) => (
-                  <span key={tech} className="px-3 py-1.5 glassmorphism text-sm rounded-full border border-slate-200 dark:border-slate-700">
+                  <span key={tech} className="px-3 py-1.5 premium-card text-sm rounded-full border border-slate-200 dark:border-slate-700 shadow-sm">
                     {tech}
                   </span>
                 ))}
@@ -77,7 +77,7 @@ const Home = () => {
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="glassmorphism-card p-1 shadow-xl">
+              <div className="premium-panel rounded-xl p-1 shadow-xl">
                 <div className="code-panel h-full">
                   <div className="code-header">
                     <div className="flex items-center gap-1.5">
@@ -93,7 +93,7 @@ const Home = () => {
                 </div>
               </div>
               
-              <div className="glassmorphism-card p-1 shadow-xl">
+              <div className="premium-panel rounded-xl p-1 shadow-xl">
                 <div className="code-panel h-full">
                   <div className="code-header">
                     <div className="flex items-center gap-1.5">
@@ -112,7 +112,7 @@ const Home = () => {
           </div>
         </section>
         
-        {/* Features Section */}
+        {/* Features Section with enhanced styling */}
         <section className="py-20 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
           <div className="container px-4">
             <div className="text-center mb-16">
@@ -125,7 +125,7 @@ const Home = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="glassmorphism-card p-6 transition-all duration-300 hover:translate-y-[-5px] hover:shadow-feature">
+              <div className="premium-card p-6 transition-all duration-300 hover:translate-y-[-5px] hover:shadow-hover">
                 <div className="feature-icon feature-icon-blue mb-4">
                   <Code className="h-5 w-5" />
                 </div>
@@ -133,7 +133,7 @@ const Home = () => {
                 <p className="text-slate-600 dark:text-slate-300">Production-ready code that follows industry best practices and patterns</p>
               </div>
               
-              <div className="glassmorphism-card p-6 transition-all duration-300 hover:translate-y-[-5px] hover:shadow-feature">
+              <div className="premium-card p-6 transition-all duration-300 hover:translate-y-[-5px] hover:shadow-hover">
                 <div className="feature-icon feature-icon-green mb-4">
                   <Layout className="h-5 w-5" />
                 </div>
@@ -141,7 +141,7 @@ const Home = () => {
                 <p className="text-slate-600 dark:text-slate-300">Access to a comprehensive library of reusable, customizable components</p>
               </div>
               
-              <div className="glassmorphism-card p-6 transition-all duration-300 hover:translate-y-[-5px] hover:shadow-feature">
+              <div className="premium-card p-6 transition-all duration-300 hover:translate-y-[-5px] hover:shadow-hover">
                 <div className="feature-icon feature-icon-blue mb-4">
                   <Terminal className="h-5 w-5" />
                 </div>
@@ -149,7 +149,7 @@ const Home = () => {
                 <p className="text-slate-600 dark:text-slate-300">Seamlessly connect your applications with third-party APIs and services</p>
               </div>
               
-              <div className="glassmorphism-card p-6 transition-all duration-300 hover:translate-y-[-5px] hover:shadow-feature">
+              <div className="premium-card p-6 transition-all duration-300 hover:translate-y-[-5px] hover:shadow-hover">
                 <div className="feature-icon feature-icon-green mb-4">
                   <Zap className="h-5 w-5" />
                 </div>
@@ -157,7 +157,7 @@ const Home = () => {
                 <p className="text-slate-600 dark:text-slate-300">Work together with your team in real-time with shared editing and commenting</p>
               </div>
               
-              <div className="glassmorphism-card p-6 transition-all duration-300 hover:translate-y-[-5px] hover:shadow-feature">
+              <div className="premium-card p-6 transition-all duration-300 hover:translate-y-[-5px] hover:shadow-hover">
                 <div className="feature-icon feature-icon-blue mb-4">
                   <Star className="h-5 w-5" />
                 </div>
@@ -165,7 +165,7 @@ const Home = () => {
                 <p className="text-slate-600 dark:text-slate-300">Start with industry-specific templates designed for professional use cases</p>
               </div>
               
-              <div className="glassmorphism-card p-6 transition-all duration-300 hover:translate-y-[-5px] hover:shadow-feature">
+              <div className="premium-card p-6 transition-all duration-300 hover:translate-y-[-5px] hover:shadow-hover">
                 <div className="feature-icon feature-icon-green mb-4">
                   <ShieldCheck className="h-5 w-5" />
                 </div>
@@ -176,7 +176,7 @@ const Home = () => {
             
             <div className="mt-16 text-center">
               <Link to="/features">
-                <Button variant="outline" size="lg" className="gap-2">
+                <Button variant="outline" size="lg" className="gap-2 backdrop-blur-sm bg-white/10 dark:bg-slate-900/10 hover:bg-white/20 dark:hover:bg-slate-900/20">
                   Explore All Features
                   <Code className="w-4 h-4" />
                 </Button>
@@ -185,11 +185,11 @@ const Home = () => {
           </div>
         </section>
         
-        {/* CTA Section */}
+        {/* CTA Section with enhanced styling */}
         <section className="py-20 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-theme-blue to-theme-green opacity-10"></div>
           <div className="container px-4 relative z-10">
-            <div className="max-w-4xl mx-auto glassmorphism-card p-12 text-center">
+            <div className="max-w-4xl mx-auto premium-panel p-12 text-center rounded-2xl">
               <h2 className="font-heading text-3xl font-semibold mb-4">
                 Ready to build with AI?
               </h2>
@@ -198,11 +198,11 @@ const Home = () => {
                 No credit card required.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Button size="lg" className="gap-2 bg-gradient-to-r from-theme-blue to-theme-green hover:opacity-90 transition-opacity">
+                <Button size="lg" className="gap-2 bg-gradient-to-r from-theme-blue to-theme-green hover:opacity-90 transition-opacity shadow-lg">
                   Get Started Free
                   <Zap className="w-4 h-4" />
                 </Button>
-                <Button size="lg" variant="outline" className="gap-2">
+                <Button size="lg" variant="outline" className="gap-2 backdrop-blur-sm bg-white/10 dark:bg-slate-900/10 hover:bg-white/20 dark:hover:bg-slate-900/20">
                   Schedule Demo
                   <Code className="w-4 h-4" />
                 </Button>
@@ -216,7 +216,7 @@ const Home = () => {
         <div className="container py-8 px-4 text-sm">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-theme-blue to-theme-green flex items-center justify-center text-white">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-theme-blue to-theme-green flex items-center justify-center text-white shadow-glow-sm">
                 <Code className="h-4 w-4" />
               </div>
               <span className="font-heading font-semibold">CodeCraft AI</span>
