@@ -61,3 +61,6 @@ export abstract class BaseClient implements AIClient {
 
 // Add the free API key constant
 export const FREE_API_KEY = "demo-key-for-free-tier";
+
+// Re-export types to ensure they're available
+export type { AIClient, AIClientOptions, AIRequestParams, AIServiceResponse };
