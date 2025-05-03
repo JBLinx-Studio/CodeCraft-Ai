@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
-import { Github, Code, Sparkles, Menu, Moon, Sun, Coffee, Settings, Flame, Zap, Star } from "lucide-react";
-import { useState } from "react";
+import { Github, Code, Moon, Sun, Menu, ExternalLink } from "lucide-react";
+import { useContext } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,100 +11,111 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { Link, useLocation } from "react-router-dom";
+import { toast } from "sonner";
+import { ThemeContext } from "@/App";
 
 export default function Header() {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { theme, setTheme } = useContext(ThemeContext);
+  const location = useLocation();
   
   const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-    // In a real app, you'd update the document class here
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    toast(`${newTheme === "light" ? "Light" : "Dark"} mode activated`, {
+      description: `Visual preference updated`,
+      duration: 2000,
+    });
+  };
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+
+  const handleUpgradeClick = () => {
+    toast("Pro Upgrade", {
+      description: "Redirecting to upgrade options",
+      action: {
+        label: "View Plans",
+        onClick: () => console.log("Viewing upgrade plans"),
+      },
+    });
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/20 shadow-lg dark:shadow-gray-900/30">
+    <header className="fixed top-0 left-0 right-0 z-50 glassmorphism-navbar">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-gradient-cool flex items-center justify-center shadow-neon animate-pulse-slow relative overflow-hidden">
-            <div className="absolute inset-0 bg-mesh-pattern opacity-30"></div>
-            <Code className="text-white w-6 h-6 relative z-10" />
-          </div>
-          <div className="flex flex-col items-start leading-none">
-            <span className="font-heading font-bold text-xl flex items-center gap-1 bg-gradient-to-r from-theme-blue via-theme-purple to-theme-pink bg-clip-text text-transparent">
-              WebCraft AI
-              <Badge className="ml-2 text-[10px] py-0 font-normal bg-theme-purple/20 text-theme-purple">BETA</Badge>
-            </span>
-            <span className="text-xs text-muted-foreground">Build anything with AI</span>
-          </div>
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-gradient-to-r from-theme-blue to-theme-green text-white transition-all duration-300 group-hover:scale-105 group-hover:shadow-glow">
+              <Code className="h-5 w-5" />
+            </div>
+            <div className="flex flex-col items-start leading-none">
+              <span className="font-heading font-semibold text-lg flex items-center gap-1.5">
+                CodeCraft AI
+                <Badge variant="outline" className="ml-1 text-[10px] py-0 h-4 px-1 font-normal">BETA</Badge>
+              </span>
+              <span className="text-xs text-muted-foreground">Enterprise AI Development</span>
+            </div>
+          </Link>
         </div>
         
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" className="text-muted-foreground hidden sm:flex">
-            Docs
-          </Button>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-muted-foreground hidden sm:flex gap-1.5">
-                <Flame className="w-3.5 h-3.5 text-theme-orange" /> Features
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 glass">
-              <DropdownMenuLabel>Features</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex gap-2">
-                <span className="icon-wrapper icon-gradient">
-                  <Code className="h-3.5 w-3.5" />
-                </span>
-                Code Generation
-              </DropdownMenuItem>
-              <DropdownMenuItem className="flex gap-2">
-                <span className="icon-wrapper icon-gradient" style={{ background: 'linear-gradient(to right, #8B5CF6, #D946EF)' }}>
-                  <Sparkles className="h-3.5 w-3.5" />
-                </span>
-                AI Templates
-              </DropdownMenuItem>
-              <DropdownMenuItem className="flex gap-2">
-                <span className="icon-wrapper icon-gradient" style={{ background: 'linear-gradient(to right, #EC4899, #F43F5E)' }}>
-                  <Coffee className="h-3.5 w-3.5" />
-                </span>
-                Custom Styles
-              </DropdownMenuItem>
-              <DropdownMenuItem className="flex gap-2">
-                <span className="icon-wrapper icon-gradient" style={{ background: 'linear-gradient(to right, #14B8A6, #06B6D4)' }}>
-                  <Star className="h-3.5 w-3.5" />
-                </span>
-                Smart Components
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="flex items-center gap-4">
+          <nav className="hidden md:flex items-center gap-1">
+            <Link to="/" className={`nav-link ${isActive('/') ? 'nav-link-active' : ''}`}>Home</Link>
+            <Link to="/features" className={`nav-link ${isActive('/features') ? 'nav-link-active' : ''}`}>Features</Link>
+            <Link to="/templates" className={`nav-link ${isActive('/templates') ? 'nav-link-active' : ''}`}>Templates</Link>
+            <Link to="/documentation" className={`nav-link ${isActive('/documentation') ? 'nav-link-active' : ''}`}>Docs</Link>
+          </nav>
           
           <Button 
             variant="ghost" 
             size="icon" 
-            className="rounded-full hover:bg-white/20"
+            className="rounded-full transition-all duration-300 hover:bg-primary/10"
             onClick={toggleTheme}
+            title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
           >
             {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </Button>
           
-          <Button variant="outline" size="sm" className="gap-2 border-primary/20 hover:border-primary/50 glass">
+          <Button variant="outline" size="sm" className="gap-2 hidden sm:flex hover:bg-primary/10 hover:border-primary/30 transition-all duration-300">
             <Github className="w-4 h-4" />
-            <span className="hidden sm:inline">GitHub</span>
+            <span>GitHub</span>
           </Button>
           
           <Button 
             variant="default" 
             size="sm" 
-            className="gap-1.5 shadow-neon bg-gradient-to-r from-theme-blue to-theme-purple hover:from-theme-purple hover:to-theme-blue relative overflow-hidden group"
+            className="gap-1.5 bg-gradient-to-r from-theme-blue to-theme-green hover:opacity-90 shadow-glow-sm hover:shadow-glow transition-all duration-300"
+            onClick={handleUpgradeClick}
           >
-            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
-            <Zap className="w-3.5 h-3.5" />
-            <span>Pro</span>
+            Upgrade Pro
+            <ExternalLink className="w-3.5 h-3.5 ml-0.5" />
           </Button>
           
-          <Button variant="ghost" size="icon" className="sm:hidden rounded-full">
-            <Menu className="h-4 w-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden rounded-full">
+                <Menu className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="glassmorphism-card w-56">
+              <DropdownMenuLabel>Navigation</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/" className="flex gap-2 cursor-pointer w-full">Home</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/features" className="flex gap-2 cursor-pointer w-full">Features</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/templates" className="flex gap-2 cursor-pointer w-full">Templates</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/documentation" className="flex gap-2 cursor-pointer w-full">Documentation</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

@@ -9,9 +9,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useAI } from "@/hooks/use-ai";
 import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import AISettings from "./AISettings";
-import { Settings, Sparkles, Zap, RefreshCcw } from "lucide-react";
+import { Settings, Sparkles, Zap, RefreshCcw, Info, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ChatPanelProps {
   onCodeGenerated: (html: string, css: string, js: string) => void;
@@ -22,12 +29,14 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
     {
       id: "system-1",
       role: "assistant",
-      content: "Hello! I'm WebCraft AI. I can help you build amazing web applications. What would you like to create today? You can describe what you want to build or ask me questions about web development.",
+      content: "Hello! I'm CodeCraft AI. I can help you build amazing web applications. What would you like to create today? You can describe what you want to build or ask me questions about web development.",
       timestamp: Date.now(),
     },
   ]);
   
   const [showSettings, setShowSettings] = useState(false);
+  const [hasAuthError, setHasAuthError] = useState(false);
+  
   const { 
     generateCode, 
     isProcessing, 
@@ -39,7 +48,7 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
     modelType,
     usingFreeAPI
   } = useAI();
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const addMessage = (role: "user" | "assistant", content: string) => {
@@ -52,10 +61,45 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
     setMessages((prev) => [...prev, newMessage]);
   };
 
+  // Check for API errors initially
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      if (!apiKey && usingFreeAPI) {
+        // We might have auth issues with free API
+        try {
+          const response = await fetch("https://api-inference.huggingface.co/models/google/flan-t5-small", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ inputs: "test" }),
+          });
+          
+          if (response.status === 401) {
+            setHasAuthError(true);
+          }
+        } catch (error) {
+          console.error("Error checking API status:", error);
+        }
+      }
+    };
+    
+    checkAuthStatus();
+  }, [apiKey, usingFreeAPI]);
+
   const handleSendMessage = async (content: string) => {
     addMessage("user", content);
     
     if (isProcessing) {
+      return;
+    }
+    
+    // Check for API authentication issues before attempting to generate
+    if (hasAuthError && usingFreeAPI && !apiKey) {
+      toast.error("API Authentication Error", {
+        description: "Please configure your API key in settings to continue.",
+        duration: 5000,
+      });
+      
+      setShowSettings(true);
       return;
     }
     
@@ -83,8 +127,19 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
       setMessages(prev => prev.filter(msg => msg.id !== thinkingId));
       
       if (response.error) {
+        if (response.error.includes("401") || response.error.includes("Authentication")) {
+          setHasAuthError(true);
+          addMessage("assistant", `I'm having trouble connecting to the AI service. Please check your API settings by clicking the settings icon.`);
+          
+          toast.error("Authentication Error", {
+            description: "Please check your API settings",
+          });
+          
+          return;
+        }
+        
         addMessage("assistant", `I encountered an error: ${response.error}. Please try again with a different request.`);
-        toast({
+        uiToast({
           title: "Error",
           description: response.error,
           variant: "destructive",
@@ -92,7 +147,7 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
         return;
       }
       
-      const { html = "", css = "", js = "" } = response.code;
+      const { html = "", css = "", js = "" } = response.code || {};
       
       // Only update the preview if code was actually generated
       if (html || css || js) {
@@ -102,18 +157,38 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
       // Add the AI's response message
       let responseMessage = response.explanation || "I've created a web app based on your description.";
       addMessage("assistant", responseMessage);
+      
+      // Success notification
+      if (html || css || js) {
+        toast.success("Code generated successfully!", {
+          description: "Check the preview panel to see your application",
+          duration: 3000,
+        });
+      }
     } catch (error) {
       console.error("Error generating code:", error);
       
       // Remove the thinking message
       setMessages(prev => prev.filter(msg => msg.id !== thinkingId));
       
-      addMessage("assistant", "I'm having trouble generating code right now. Please try again later.");
-      toast({
-        title: "Error",
-        description: "Failed to generate code. Using fallback mode.",
-        variant: "destructive",
-      });
+      // Check if it's an authentication error
+      if (error instanceof Error && 
+          (error.message.includes("401") || 
+           error.message.includes("authentication") || 
+           error.message.includes("Unauthorized"))) {
+        setHasAuthError(true);
+        addMessage("assistant", "I'm having trouble authenticating with the AI service. Please check your API settings by clicking the settings icon above.");
+        
+        toast.error("Authentication Error", {
+          description: "Please configure your API key in settings"
+        });
+      } else {
+        addMessage("assistant", "I'm having trouble generating code right now. Please try again later.");
+        
+        toast.error("Generation Error", {
+          description: "Failed to generate code. Using fallback mode.",
+        });
+      }
     }
   };
 
@@ -132,6 +207,10 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
         timestamp: Date.now(),
       },
     ]);
+    
+    toast.info("Chat cleared", {
+      description: "All previous messages have been removed"
+    });
   };
 
   const toggleSettings = () => {
@@ -152,6 +231,21 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
               Free API Mode
             </Badge>
           )}
+          {hasAuthError && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge variant="outline" className="text-xs font-normal text-red-600 bg-red-50 border-red-200 ml-2 cursor-pointer" onClick={toggleSettings}>
+                    <AlertCircle className="h-3 w-3 mr-1 text-red-500" />
+                    Auth Error
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs max-w-xs">Authentication error detected. Click to configure your API key in settings.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </h2>
         <div className="flex gap-2">
           <Button 
@@ -159,7 +253,7 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
             size="icon"
             onClick={toggleSettings}
             title="AI Settings"
-            className="h-8 w-8 rounded-full"
+            className={`h-8 w-8 rounded-full ${hasAuthError ? 'text-red-500 animate-pulse bg-red-50' : ''}`}
           >
             <Settings className="h-4 w-4" />
           </Button>
@@ -182,10 +276,23 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
           apiProvider={apiProvider}
           modelType={modelType}
           usingFreeAPI={usingFreeAPI}
-          onSave={saveApiKey}
+          onSave={(key, provider, model) => {
+            saveApiKey(key, provider, model);
+            setHasAuthError(false);
+            toast.success("Settings saved", {
+              description: "Your AI configuration has been updated"
+            });
+          }}
           onClear={clearApiKey}
           onClose={toggleSettings}
-          onSetFreeAPI={setFreeAPI}
+          onSetFreeAPI={(usesFree) => {
+            setFreeAPI(usesFree);
+            if (usesFree) {
+              toast.info("Using free API mode", {
+                description: "Limited functionality available"
+              });
+            }
+          }}
         />
       ) : (
         <>
@@ -194,9 +301,34 @@ export default function ChatPanel({ onCodeGenerated }: ChatPanelProps) {
               <ChatMessage key={message.id} message={message} />
             ))}
             <div ref={messagesEndRef} />
+            
+            {hasAuthError && messages.length < 3 && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-lg p-4 text-sm text-red-800 dark:text-red-300 animate-fade-in">
+                <div className="flex gap-2 items-start">
+                  <Info className="h-5 w-5 text-red-500 mt-0.5" />
+                  <div>
+                    <h3 className="font-medium">API Authentication Error</h3>
+                    <p className="mt-1">To use AI features, you need to configure your API key by clicking the settings icon above.</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-2 text-xs bg-white dark:bg-slate-800 border-red-300 dark:border-red-700/50 text-red-600"
+                      onClick={toggleSettings}
+                    >
+                      Configure API Settings
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           <div className="p-4 border-t bg-card/50">
-            <ChatInput onSendMessage={handleSendMessage} isProcessing={isProcessing} />
+            <ChatInput 
+              onSendMessage={handleSendMessage} 
+              isProcessing={isProcessing} 
+              disabled={hasAuthError && !apiKey && usingFreeAPI}
+              errorMessage={hasAuthError && !apiKey && usingFreeAPI ? "Please configure API settings first" : undefined}
+            />
           </div>
         </>
       )}
