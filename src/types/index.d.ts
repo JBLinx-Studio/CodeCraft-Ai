@@ -1,6 +1,4 @@
 
-import { type } from "os";
-
 export interface AIResponse {
   code: {
     html: string;
@@ -17,6 +15,20 @@ export interface AIClientConfig {
   apiKey: string;
   provider: AIProvider;
   modelType?: string;
+}
+
+export interface AIClientOptions {
+  apiKey: string;
+  modelType?: string;
+}
+
+export interface AIServiceResponse {
+  text: string;
+  usage?: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
 }
 
 export interface Message {

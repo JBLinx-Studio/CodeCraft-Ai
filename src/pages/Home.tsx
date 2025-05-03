@@ -35,15 +35,15 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-subtle-grid bg-fixed">
+    <div className="flex flex-col min-h-screen">
       <Header />
       
       <main className="flex-1 flex flex-col lg:flex-row gap-4 p-4 mt-16 container">
-        <div className="lg:w-1/2 flex flex-col min-h-[500px] rounded-xl overflow-hidden premium-panel">
+        <div className="lg:w-1/2 flex flex-col min-h-[500px] rounded-xl overflow-hidden lovable-card">
           <ChatPanel onCodeGenerated={handleCodeGenerated} />
         </div>
         
-        <div className="lg:w-1/2 flex flex-col min-h-[500px] rounded-xl overflow-hidden premium-panel">
+        <div className="lg:w-1/2 flex flex-col min-h-[500px] rounded-xl overflow-hidden lovable-card">
           <PreviewPanel html={html} css={css} js={js} />
         </div>
       </main>

@@ -8,11 +8,13 @@ import "./App.css";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/templates" element={<Templates />} />
-      <Route path="/home" element={<Home />} />
-    </Routes>
+    <div className="bg-circles-pattern min-h-screen">
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/templates" element={<Templates />} />
+        <Route path="/home" element={<Home />} />
+      </Routes>
+    </div>
   );
 }
 
