@@ -1,6 +1,6 @@
 
 import Header from "@/components/Header";
-import ChatPanel from "@/components/ChatPanel";
+import { ChatPanel } from "@/components/ChatPanel"; // Changed to named import
 import PreviewPanel from "@/components/PreviewPanel";
 import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";

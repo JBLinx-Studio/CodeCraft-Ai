@@ -1,7 +1,68 @@
 
-// Only the handleSendMessage function (the rest is handled in the earlier write)
+import { useState, useEffect } from "react";
+import { nanoid } from "nanoid";
+import ChatMessage from "./ChatMessage";
+import ChatInput from "./ChatInput";
+import { Message } from "@/types";
+import AISettings from "./AISettings";
+import { Settings } from "lucide-react";
+import { Button } from "./ui/button";
+import { generateCode as aiGenerateCode } from "@/hooks/use-ai";
+import { toast } from "sonner";
+import { ScrollArea } from "./ui/scroll-area";
+import { extractCodeBlocks } from "@/lib/utils";
 
-const handleSendMessage = async (content: string) => {
+export interface ChatPanelProps {
+  onCodeGenerated: (html: string, css: string, js: string) => void;
+}
+
+export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [apiKey, setApiKey] = useState<string | null>(localStorage.getItem("api_key"));
+  const [usingFreeAPI, setUsingFreeAPI] = useState(localStorage.getItem("using_free_api") !== "false");
+  const [hasAuthError, setHasAuthError] = useState(false);
+
+  useEffect(() => {
+    // Add welcome message
+    if (messages.length === 0) {
+      setMessages([
+        {
+          id: nanoid(),
+          role: "assistant",
+          content: "Hello! I'm your AI assistant. Describe the web app you'd like me to build for you.",
+          timestamp: Date.now(),
+        },
+      ]);
+    }
+  }, [messages.length]);
+
+  const addMessage = (role: "user" | "assistant", content: string) => {
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: nanoid(),
+        role,
+        content,
+        timestamp: Date.now(),
+      },
+    ]);
+  };
+
+  const generateCode = async (content: string) => {
+    setIsProcessing(true);
+    try {
+      const response = await aiGenerateCode(content, apiKey);
+      setIsProcessing(false);
+      return response;
+    } catch (error) {
+      setIsProcessing(false);
+      throw error;
+    }
+  };
+
+  const handleSendMessage = async (content: string) => {
     addMessage("user", content);
     
     if (isProcessing) {
@@ -55,7 +116,7 @@ const handleSendMessage = async (content: string) => {
         }
         
         addMessage("assistant", `I encountered an error: ${response.error}. Please try again with a different request.`);
-        uiToast({
+        toast({
           title: "Error",
           description: response.error,
           variant: "destructive",
@@ -107,3 +168,51 @@ const handleSendMessage = async (content: string) => {
       }
     }
   };
+
+  const handleApiKeyChange = (key: string | null, useFreeApi: boolean) => {
+    setApiKey(key);
+    setUsingFreeAPI(useFreeApi);
+    setHasAuthError(false);
+    localStorage.setItem("api_key", key || "");
+    localStorage.setItem("using_free_api", useFreeApi ? "true" : "false");
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex justify-between items-center p-3 border-b bg-secondary/20">
+        <h2 className="font-medium text-sm">AI Assistant</h2>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => setShowSettings(!showSettings)}
+          title="AI Settings"
+        >
+          <Settings className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {showSettings && (
+        <AISettings 
+          onClose={() => setShowSettings(false)}
+          apiKey={apiKey}
+          useFreeApi={usingFreeAPI}
+          onApiKeyChange={handleApiKeyChange}
+        />
+      )}
+
+      <ScrollArea className="flex-1 p-4">
+        <div className="space-y-4 mb-4">
+          {messages.map((message) => (
+            <ChatMessage key={message.id} message={message} />
+          ))}
+        </div>
+      </ScrollArea>
+
+      <div className="p-2 border-t bg-background/50 backdrop-blur-sm">
+        <ChatInput onSendMessage={handleSendMessage} disabled={isProcessing} />
+      </div>
+    </div>
+  );
+};
+
+export default ChatPanel; // Add a default export
