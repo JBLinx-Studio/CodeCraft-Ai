@@ -7,7 +7,7 @@ import { Message } from "@/types";
 import AISettings from "./AISettings";
 import { Settings } from "lucide-react";
 import { Button } from "./ui/button";
-import { useAI } from "@/hooks/use-ai";
+import { generateCode as aiGenerateCode } from "@/hooks/use-ai";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import { extractCodeBlocks } from "@/lib/utils";
@@ -18,15 +18,10 @@ export interface ChatPanelProps {
 
 export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const { 
-    isProcessing,
-    generateCode,
-    apiKey,
-    usingFreeAPI,
-    saveApiKey,
-    setFreeAPI
-  } = useAI();
+  const [apiKey, setApiKey] = useState<string | null>(localStorage.getItem("api_key"));
+  const [usingFreeAPI, setUsingFreeAPI] = useState(localStorage.getItem("using_free_api") !== "false");
   const [hasAuthError, setHasAuthError] = useState(false);
 
   useEffect(() => {
@@ -53,6 +48,18 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
         timestamp: Date.now(),
       },
     ]);
+  };
+
+  const generateCode = async (content: string) => {
+    setIsProcessing(true);
+    try {
+      const response = await aiGenerateCode(content, apiKey);
+      setIsProcessing(false);
+      return response;
+    } catch (error) {
+      setIsProcessing(false);
+      throw error;
+    }
   };
 
   const handleSendMessage = async (content: string) => {
@@ -109,8 +116,10 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
         }
         
         addMessage("assistant", `I encountered an error: ${response.error}. Please try again with a different request.`);
-        toast.error("Error", {
+        toast({
+          title: "Error",
           description: response.error,
+          variant: "destructive",
         });
         return;
       }
@@ -161,12 +170,11 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
   };
 
   const handleApiKeyChange = (key: string | null, useFreeApi: boolean) => {
-    if (useFreeApi) {
-      setFreeAPI();
-    } else if (key) {
-      saveApiKey(key, useFreeApi ? "FREE" : "PERPLEXITY");
-    }
+    setApiKey(key);
+    setUsingFreeAPI(useFreeApi);
     setHasAuthError(false);
+    localStorage.setItem("api_key", key || "");
+    localStorage.setItem("using_free_api", useFreeApi ? "true" : "false");
   };
 
   return (
@@ -187,7 +195,7 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
         <AISettings 
           onClose={() => setShowSettings(false)}
           apiKey={apiKey}
-          usingFreeAPI={usingFreeAPI}
+          useFreeApi={usingFreeAPI}
           onApiKeyChange={handleApiKeyChange}
         />
       )}
@@ -201,14 +209,10 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
       </ScrollArea>
 
       <div className="p-2 border-t bg-background/50 backdrop-blur-sm">
-        <ChatInput 
-          onSendMessage={handleSendMessage} 
-          disabled={isProcessing}
-          isProcessing={isProcessing}
-        />
+        <ChatInput onSendMessage={handleSendMessage} disabled={isProcessing} />
       </div>
     </div>
   );
 };
 
-export default ChatPanel;
+export default ChatPanel; // Add a default export
