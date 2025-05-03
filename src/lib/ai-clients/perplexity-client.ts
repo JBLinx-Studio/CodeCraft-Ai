@@ -1,91 +1,126 @@
 
-import { BaseClient, AIClientResponse, AIRequestParams } from "./base-client";
-import { AIClientConfig } from "../ai-clients/ai-client-factory";
-
-export const PERPLEXITY_MODELS = {
-  SMALL: "llama-3-8b-instruct",
-  MEDIUM: "mixtral-8x7b-instruct",
-  LARGE: "sonar-medium-online"
-};
+import { AIClientConfig, AIResponse } from "@/types";
+import { AIClientResponse, BaseClient, AIRequestParams } from "./base-client";
 
 export class PerplexityClient extends BaseClient {
   private apiKey: string;
-  private model: string;
+  private modelType: string;
 
   constructor(config: AIClientConfig) {
     super();
     this.apiKey = config.apiKey;
-    this.model = config.modelType && PERPLEXITY_MODELS[config.modelType as keyof typeof PERPLEXITY_MODELS] 
-      ? PERPLEXITY_MODELS[config.modelType as keyof typeof PERPLEXITY_MODELS]
-      : PERPLEXITY_MODELS.SMALL;
+    this.modelType = config.modelType || "SMALL";
   }
-  
+
   async generateResponse(params: AIRequestParams): Promise<AIClientResponse> {
     try {
       const { prompt, chatHistory } = params;
       
-      const formattedChatHistory = chatHistory.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
+      // Prepare messages including system prompt and conversation history
+      const messages = [
+        {
+          role: "system",
+          content: "You are an expert web developer. Generate HTML, CSS, and JavaScript code for the requested web application. Respond with ONLY code blocks for HTML, CSS, and JavaScript, and a brief explanation."
+        },
+        ...chatHistory.map(msg => ({
+          role: msg.role as "user" | "assistant",
+          content: msg.content
+        })),
+        {
+          role: "user",
+          content: prompt
+        }
+      ];
       
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
-        method: 'POST',
+      // Model selection based on configuration
+      const model = this.modelType === "LARGE" 
+        ? "llama-3.1-sonar-large-128k-online" 
+        : "llama-3.1-sonar-small-128k-online";
+
+      // Make API request to Perplexity
+      const response = await fetch("https://api.perplexity.ai/chat/completions", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${this.apiKey}`
         },
         body: JSON.stringify({
-          model: this.model,
-          messages: [
-            {
-              role: "system",
-              content: "You are a web development AI assistant that helps create HTML, CSS, and JavaScript code for web applications. When asked to build something, you should provide the complete HTML, CSS, and JavaScript code necessary to implement the requested feature or application. Separate your response into sections for HTML, CSS, and JavaScript. Make your designs responsive and visually appealing."
-            },
-            ...formattedChatHistory,
-            {
-              role: "user",
-              content: prompt
-            }
-          ]
+          model,
+          messages,
+          max_tokens: 4000,
+          temperature: 0.2,
+          frequency_penalty: 0.7
         })
       });
-      
+
       if (!response.ok) {
-        const errorText = await response.text();
-        return {
-          success: false,
-          error: `API Error (${response.status}): ${errorText || response.statusText}`
-        };
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Perplexity API error: ${response.status} ${
+          errorData.error?.message || response.statusText
+        }`);
       }
-      
+
       const data = await response.json();
-      const assistantResponse = data.choices[0].message.content;
+      const aiContent = data.choices[0]?.message?.content || "";
       
-      // Parse the response to extract code blocks
-      const htmlMatch = assistantResponse.match(/```html\s*([\s\S]*?)\s*```/i);
-      const cssMatch = assistantResponse.match(/```css\s*([\s\S]*?)\s*```/i);
-      const jsMatch = assistantResponse.match(/```js(?:cript)?\s*([\s\S]*?)\s*```/i);
+      // Extract code blocks from the response
+      const codeBlocks = this.extractCodeBlocks(aiContent);
       
-      // Clean up explanation by removing code blocks
-      let explanation = assistantResponse.replace(/```(?:html|css|js|javascript)[\s\S]*?```/gi, '').trim();
+      // Prepare the response with code and explanation
+      const aiResponse: AIResponse = {
+        code: {
+          html: codeBlocks.html || "",
+          css: codeBlocks.css || "",
+          js: codeBlocks.js || ""
+        },
+        explanation: this.extractExplanation(aiContent, codeBlocks.explanationExists)
+      };
       
       return {
         success: true,
-        data: {
-          code: {
-            html: htmlMatch ? htmlMatch[1].trim() : "",
-            css: cssMatch ? cssMatch[1].trim() : "",
-            js: jsMatch ? jsMatch[1].trim() : ""
-          },
-          explanation
-        }
+        data: aiResponse
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error occurred"
+        error: error instanceof Error ? error.message : "API error occurred"
       };
     }
+  }
+  
+  private extractCodeBlocks(content: string): { 
+    html: string; 
+    css: string; 
+    js: string; 
+    explanationExists: boolean 
+  } {
+    const htmlRegex = /```html\n([\s\S]*?)```/;
+    const cssRegex = /```css\n([\s\S]*?)```/;
+    const jsRegex = /```(?:javascript|js)\n([\s\S]*?)```/;
+    
+    const htmlMatch = content.match(htmlRegex);
+    const cssMatch = content.match(cssRegex);
+    const jsMatch = content.match(jsRegex);
+    
+    return {
+      html: htmlMatch ? htmlMatch[1].trim() : "",
+      css: cssMatch ? cssMatch[1].trim() : "",
+      js: jsMatch ? jsMatch[1].trim() : "",
+      explanationExists: true // We always provide an explanation
+    };
+  }
+  
+  private extractExplanation(content: string, hasCodeBlocks: boolean): string {
+    // If there are no code blocks, the entire content is the explanation
+    if (!hasCodeBlocks) return content.trim();
+    
+    // Remove code blocks to get explanation
+    let explanation = content
+      .replace(/```html\n[\s\S]*?```/g, "")
+      .replace(/```css\n[\s\S]*?```/g, "")
+      .replace(/```(?:javascript|js)\n[\s\S]*?```/g, "")
+      .trim();
+    
+    return explanation || "Code generated successfully";
   }
 }
