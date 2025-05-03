@@ -1,10 +1,10 @@
 
+import { AIClient, AIClientOptions, FREE_API_KEY } from "./base-client";
+import { OpenAIClient, OpenAIClientOptions } from "./openai-client";
+import { HuggingFaceClient, HuggingFaceClientOptions } from "./huggingface-client";
+import { PerplexityClient, PERPLEXITY_MODELS, PerplexityClientOptions } from "./perplexity-client";
+import { FreeAPIClient, FreeClientOptions } from "./free-client";
 import { AIProvider } from "@/types";
-import { AIClient, FREE_API_KEY } from "./base-client";
-import { OpenAIClient } from "./openai-client";
-import { HuggingFaceClient } from "./huggingface-client";
-import { PerplexityClient, PERPLEXITY_MODELS } from "./perplexity-client";
-import { FreeAPIClient } from "./free-client";
 
 export interface AIClientFactoryOptions {
   apiKey: string;

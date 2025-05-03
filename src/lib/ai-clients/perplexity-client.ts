@@ -1,6 +1,5 @@
 
-import { AIClient, AIClientOptions, AIRequestParams } from "./base-client";
-import { AIServiceResponse } from "@/types";
+import { AIClient, AIClientOptions, AIRequestParams, AIServiceResponse } from "./base-client";
 
 export const PERPLEXITY_MODELS = {
   SMALL: "llama-3.1-sonar-small-128k-online",
@@ -30,21 +29,22 @@ interface PerplexityResponse {
   };
 }
 
-export class PerplexityClient extends AIClient {
+export class PerplexityClient implements AIClient {
   private model: string;
+  private apiKey: string | null;
   
   constructor(options: PerplexityClientOptions) {
-    super(options);
+    this.apiKey = options.apiKey;
     this.model = options.model 
       ? (typeof options.model === 'string' && options.model in PERPLEXITY_MODELS 
           ? PERPLEXITY_MODELS[options.model as keyof typeof PERPLEXITY_MODELS]
-          : options.model)
+          : options.model as string)
       : PERPLEXITY_MODELS.SMALL;
   }
   
   async generateResponse(params: AIRequestParams): Promise<AIServiceResponse> {
     try {
-      const { prompt, chatHistory } = params;
+      const { prompt, chatHistory = [] } = params;
       
       // Check if this is a simple conversation rather than a code request
       if (this.isSimpleConversation(prompt)) {
@@ -128,7 +128,7 @@ Make your response conversational, educational, and practical - as if you're a h
     );
   }
   
-  private handleConversation(prompt: string, history: Array<{role: string, content: string}>): AIServiceResponse {
+  private handleConversation(prompt: string, history: Array<{role: string, content: string}> = []): AIServiceResponse {
     const isFirstMessage = history.filter(msg => msg.role === "user").length === 0;
     const simplifiedPrompt = prompt.toLowerCase().trim();
     let response = "";
@@ -264,5 +264,15 @@ Make your response conversational, educational, and practical - as if you're a h
         error: "Error parsing API response" 
       };
     }
+  }
+
+  createEnhancedPrompt(prompt: string, chatHistory: Array<{ role: string; content: string }> = []): string {
+    return `Generate a web application based on this description: ${prompt}`;
+  }
+
+  private createEnhancedSystemPrompt(): string {
+    return `You are a helpful AI assistant that specializes in web development. 
+    Your task is to generate high-quality, functional HTML, CSS, and JavaScript code based on user requests.
+    Provide well-commented, clean code that follows best practices.`;
   }
 }

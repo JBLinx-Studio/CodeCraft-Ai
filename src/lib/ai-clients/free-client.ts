@@ -1,24 +1,25 @@
-import { AIClient, AIClientOptions, AIRequestParams } from "./base-client";
-import { AIServiceResponse } from "@/types";
+
+import { AIClient, AIClientOptions, AIRequestParams, AIServiceResponse } from "./base-client";
 import { extractCodeBlocks } from "@/lib/utils";
 
 export interface FreeClientOptions extends AIClientOptions {
   model?: string;
 }
 
-export class FreeAPIClient extends AIClient {
+export class FreeAPIClient implements AIClient {
   private model: string;
+  private apiKey: string | null;
   private isProcessingRequest: boolean = false;
   
   constructor(options: FreeClientOptions) {
-    super(options);
+    this.apiKey = options.apiKey;
     // Using a model that's more accessible without authentication
     this.model = options.model || "google/flan-t5-small";
   }
   
   async generateResponse(params: AIRequestParams): Promise<AIServiceResponse> {
     try {
-      const { prompt, chatHistory } = params;
+      const { prompt, chatHistory = [] } = params;
       this.isProcessingRequest = true;
       
       // Check if this is a simple conversation starter (greeting)
@@ -120,7 +121,7 @@ export class FreeAPIClient extends AIClient {
     );
   }
   
-  private handleConversation(prompt: string, history: Array<{role: string, content: string}>): AIServiceResponse {
+  private handleConversation(prompt: string, history: Array<{role: string, content: string}> = []): AIServiceResponse {
     const isFirstMessage = history.filter(msg => msg.role === "user").length === 0;
     let response = "";
     
@@ -206,7 +207,7 @@ If the user doesn't specifically request code, engage in a helpful conversation 
     return messages;
   }
   
-  private createLocalResponse(prompt: string, history: Array<{role: string, content: string}>): AIServiceResponse {
+  private createLocalResponse(prompt: string, history: Array<{role: string, content: string}> = []): AIServiceResponse {
     // Generate a thoughtful but local response when APIs fail
     const thinkingSteps = this.generateThinkingProcess(prompt);
     
@@ -292,5 +293,15 @@ If the user doesn't specifically request code, engage in a helpful conversation 
     
     const lowerPrompt = prompt.toLowerCase();
     return codeKeywords.some(keyword => lowerPrompt.includes(keyword));
+  }
+
+  createEnhancedPrompt(prompt: string, chatHistory: Array<{ role: string; content: string }> = []): string {
+    return `Generate a web application based on this description: ${prompt}`;
+  }
+
+  private createEnhancedSystemPrompt(): string {
+    return `You are a helpful AI assistant that specializes in web development. 
+    Your task is to generate high-quality, functional HTML, CSS, and JavaScript code based on user requests.
+    Provide well-commented, clean code that follows best practices.`;
   }
 }
