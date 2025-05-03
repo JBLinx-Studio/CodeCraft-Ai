@@ -87,20 +87,6 @@
     @apply shadow-[0_0_10px_rgba(59,130,246,0.3)];
   }
 
-  .bg-circles-pattern {
-    background-color: #ffffff;
-    background-image: radial-gradient(#e2e8f0 2px, transparent 2px);
-    background-size: 40px 40px;
-    background-position: 0 0, 20px 20px;
-  }
-
-  .dark .bg-circles-pattern {
-    background-color: #0f172a;
-    background-image: radial-gradient(#1e293b 2px, transparent 2px);
-    background-size: 40px 40px;
-    background-position: 0 0, 20px 20px;
-  }
-
   .bg-code-pattern {
     background-color: #f8fafc;
     background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
@@ -119,19 +105,6 @@
   
   .animate-pulse-slow {
     animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-  
-  /* Enhanced UI components for Lovable style */
-  .lovable-card {
-    @apply rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-sm border border-slate-200 dark:border-slate-700 transition-all duration-300 hover:shadow-md;
-  }
-  
-  .lovable-input {
-    @apply bg-white/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all;
-  }
-  
-  .lovable-button {
-    @apply bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium rounded-lg px-4 py-2 transition-all shadow-sm hover:shadow;
   }
   
   @keyframes pulse {

@@ -1,6 +1,6 @@
 
 import { BaseClient, AIClientResponse, AIRequestParams } from "./base-client";
-import { AIClientConfig } from "./ai-client-factory";
+import { AIClientConfig } from "../ai-clients/ai-client-factory";
 
 export const PERPLEXITY_MODELS = {
   SMALL: "llama-3-8b-instruct",
@@ -9,10 +9,12 @@ export const PERPLEXITY_MODELS = {
 };
 
 export class PerplexityClient extends BaseClient {
-  protected model: string;
+  private apiKey: string;
+  private model: string;
 
   constructor(config: AIClientConfig) {
-    super({ apiKey: config.apiKey });
+    super();
+    this.apiKey = config.apiKey;
     this.model = config.modelType && PERPLEXITY_MODELS[config.modelType as keyof typeof PERPLEXITY_MODELS] 
       ? PERPLEXITY_MODELS[config.modelType as keyof typeof PERPLEXITY_MODELS]
       : PERPLEXITY_MODELS.SMALL;
@@ -20,7 +22,7 @@ export class PerplexityClient extends BaseClient {
   
   async generateResponse(params: AIRequestParams): Promise<AIClientResponse> {
     try {
-      const { prompt, chatHistory = [] } = params;
+      const { prompt, chatHistory } = params;
       
       const formattedChatHistory = chatHistory.map(msg => ({
         role: msg.role,
