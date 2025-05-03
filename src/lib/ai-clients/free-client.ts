@@ -5,7 +5,7 @@ import { smartFallbackGenerator } from "../template-generator";
 export class FreeClient extends BaseClient {
   async generateResponse(params: AIRequestParams): Promise<AIClientResponse> {
     try {
-      const { prompt, chatHistory } = params;
+      const { prompt, chatHistory = [] } = params;
       
       const response = await smartFallbackGenerator(prompt, chatHistory);
       

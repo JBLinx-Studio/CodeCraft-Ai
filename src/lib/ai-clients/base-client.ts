@@ -1,8 +1,21 @@
 
 import { AIResponse, AIServiceResponse, Message } from "@/types";
 
+export const FREE_API_KEY = "free-tier-api-key";
+
+export interface AIClientResponse {
+  success: boolean;
+  data?: AIResponse;
+  error?: string;
+}
+
+export interface AIRequestParams {
+  prompt: string;
+  chatHistory?: Array<{role: string, content: string}>;
+}
+
 export interface AIClient {
-  generateResponse(prompt: string): Promise<AIServiceResponse>;
+  generateResponse(params: AIRequestParams): Promise<AIClientResponse>;
   enhancePromptWithContext?(prompt: string, context?: string): string;
   createEnhancedSystemPrompt?(prompt: string): string;
   formatChatHistory?(messages: Message[], prompt: string): string;
@@ -22,7 +35,7 @@ export abstract class BaseClient implements AIClient {
     }
   }
   
-  abstract generateResponse(prompt: string): Promise<AIServiceResponse>;
+  abstract generateResponse(params: AIRequestParams): Promise<AIClientResponse>;
   
   createEnhancedPrompt(prompt: string): string {
     return `${prompt}`;

@@ -24,6 +24,9 @@ export interface AIClientOptions {
 
 export interface AIServiceResponse {
   text: string;
+  success?: boolean;
+  data?: AIResponse;
+  error?: string;
   usage?: {
     promptTokens: number;
     completionTokens: number;
