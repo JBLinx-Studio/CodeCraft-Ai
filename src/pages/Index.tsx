@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import Header from "@/components/Header";
-import { ChatPanel } from "@/components/ChatPanel"; // Changed to named import
+import ChatPanel from "@/components/ChatPanel";
 import PreviewPanel from "@/components/PreviewPanel";
 import TemplateGallery from "@/components/TemplateGallery";
 import { Template } from "@/types";
@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Toaster } from "@/components/ui/toaster";
 import { Separator } from "@/components/ui/separator";
 import { Code, Zap, Layout, Star } from "lucide-react";
-import CompanyBranding from "@/components/CompanyBranding";
 
 const Index = () => {
   const [html, setHtml] = useState("");
@@ -39,7 +38,7 @@ const Index = () => {
             <div className="container py-16 px-4 text-center relative z-10">
               <div className="max-w-3xl mx-auto">
                 <div className="inline-block bg-white/10 backdrop-blur-md px-4 py-1 rounded-full text-white text-sm font-medium mb-4 animate-fade-in border border-white/20">
-                  Enterprise-grade AI development by <span className="font-bold">JBLinx Studio</span>
+                  Enterprise-grade AI development
                 </div>
                 
                 <h1 className="font-heading text-3xl sm:text-5xl font-bold mb-6 animate-slide-up">
@@ -181,8 +180,6 @@ const Index = () => {
                 </div>
               </div>
             </div>
-            
-            <CompanyBranding />
           </div>
         )}
       </main>
@@ -191,13 +188,10 @@ const Index = () => {
         <div className="container py-8 text-sm">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-theme-blue to-theme-green flex items-center justify-center text-white shadow-glow-sm">
+              <div className="h-8 w-8 rounded-lg bg-slate-900 flex items-center justify-center">
                 <Code className="h-4 w-4 text-white" />
               </div>
-              <span className="font-heading font-semibold">CodeCraft AI</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-                by JBLinx Studio
-              </span>
+              <span className="font-heading font-semibold">WebCraft AI</span>
             </div>
             
             <div>
