@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import Header from "@/components/Header";
-import ChatPanel from "@/components/ChatPanel";
+import { ChatPanel } from "@/components/ChatPanel"; // Changed to named import
 import PreviewPanel from "@/components/PreviewPanel";
 import TemplateGallery from "@/components/TemplateGallery";
 import { Template } from "@/types";
