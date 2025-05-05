@@ -5,7 +5,7 @@ import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import { Message, AIProvider } from "@/types";
 import AISettings from "./AISettings";
-import { Settings, Zap, LinkIcon } from "lucide-react";
+import { Settings, Zap, LinkIcon, ChevronsRight, ChevronsLeft, SquareTerminal } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAI } from "@/hooks/use-ai";
 import { toast } from "sonner";
@@ -197,7 +197,7 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
               apiKey={apiKey || ""}
               usingFreeAPI={usingFreeAPI}
               onSave={handleApiSettingsChange}
-              provider={apiProvider}
+              apiProvider={apiProvider} // Fix: change provider to apiProvider
               modelType={modelType}
             />
           </SheetContent>
