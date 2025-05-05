@@ -5,12 +5,13 @@ import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import { Message, AIProvider } from "@/types";
 import AISettings from "./AISettings";
-import { Settings } from "lucide-react";
+import { Settings, Zap, LinkIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAI } from "@/hooks/use-ai";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
-import { extractCodeBlocks } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 
 export interface ChatPanelProps {
   onCodeGenerated: (html: string, css: string, js: string) => void;
@@ -170,31 +171,40 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex justify-between items-center p-3 border-b bg-secondary/20">
-        <h2 className="font-medium text-sm">AI Assistant</h2>
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => setShowSettings(!showSettings)}
-          title="AI Settings"
-        >
-          <Settings className="h-4 w-4" />
-        </Button>
+    <div className="flex flex-col h-full cyber-panel overflow-hidden">
+      <div className="flex justify-between items-center p-3 border-b bg-gradient-to-r from-slate-800/90 to-slate-900/90">
+        <div className="flex items-center gap-2">
+          <div className="h-6 w-6 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 flex items-center justify-center shadow-glow-sm pulse cyber-pulse">
+            <Zap className="h-3.5 w-3.5 text-white" />
+          </div>
+          <h2 className="font-medium text-sm bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400">AI Assistant</h2>
+        </div>
+        
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="hover:bg-slate-800/50 h-8 w-8 rounded-full"
+              title="AI Settings"
+            >
+              <Settings className="h-4 w-4 text-cyan-400" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent className="cyber-panel border-l border-cyan-500/30 w-[350px] sm:w-[450px] backdrop-blur-xl">
+            <AISettings 
+              onClose={() => {}}
+              apiKey={apiKey || ""}
+              usingFreeAPI={usingFreeAPI}
+              onSave={handleApiSettingsChange}
+              provider={apiProvider}
+              modelType={modelType}
+            />
+          </SheetContent>
+        </Sheet>
       </div>
 
-      {showSettings && (
-        <AISettings 
-          onClose={() => setShowSettings(false)}
-          apiKey={apiKey || ""}
-          usingFreeAPI={usingFreeAPI}
-          onSave={handleApiSettingsChange}
-          selectedProvider={apiProvider}
-          selectedModel={modelType}
-        />
-      )}
-
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-slate-900/80 to-slate-800/80">
         <div className="space-y-4 mb-4">
           {messages.map((message) => (
             <ChatMessage key={message.id} message={message} />
@@ -202,7 +212,7 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
         </div>
       </ScrollArea>
 
-      <div className="p-2 border-t bg-background/50 backdrop-blur-sm">
+      <div className="p-2 border-t border-slate-700/50 bg-slate-800/90 backdrop-blur-sm">
         <ChatInput onSendMessage={handleSendMessage} disabled={isProcessing} isProcessing={isProcessing} />
       </div>
     </div>
