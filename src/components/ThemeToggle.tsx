@@ -38,25 +38,25 @@ const ThemeToggle = () => {
 
   return (
     <Button
-      variant={isDark ? "outline" : "default"}
+      variant="outline"
       size="icon"
       onClick={toggleTheme}
       title={isDark ? "Switch to light theme" : "Switch to dark theme"}
-      className={`h-9 w-9 relative overflow-hidden transition-all duration-500 ${isDark ? 'border-purple-500/50 bg-slate-800/90' : 'border-cyan-500/50 bg-white/90'}`}
+      className="h-9 w-9 relative overflow-hidden transition-all duration-300"
     >
       <span
         className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ${
           isDark ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
         }`}
       >
-        <Moon className="h-4 w-4 text-purple-400" />
+        <Moon className="h-4 w-4" />
       </span>
       <span
         className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ${
           !isDark ? "translate-y-0 opacity-100" : "-translate-y-10 opacity-0"
         }`}
       >
-        <Sun className="h-4 w-4 text-cyan-500" />
+        <Sun className="h-4 w-4" />
       </span>
     </Button>
   );

@@ -178,17 +178,13 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <div className={cn(
-        "flex justify-between items-center p-3 border-b",
-        "bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-950/90 dark:to-purple-950/90",
-        "backdrop-filter backdrop-blur-md"
-      )}>
+    <div className="flex flex-col h-full cyber-panel overflow-hidden">
+      <div className="flex justify-between items-center p-3 border-b bg-gradient-to-r from-slate-800/90 to-slate-900/90">
         <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center shadow-glow-sm cyber-pulse">
+          <div className="h-7 w-7 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 flex items-center justify-center shadow-glow-sm cyber-pulse">
             <Zap className="h-4 w-4 text-white" />
           </div>
-          <h2 className="font-medium text-base text-gradient-primary">AI Assistant</h2>
+          <h2 className="font-medium text-base bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400">AI Assistant</h2>
         </div>
         
         <Sheet>
@@ -196,16 +192,13 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
             <Button 
               variant="ghost" 
               size="icon"
-              className={cn(
-                "hover:bg-blue-500/10 dark:hover:bg-purple-500/20 h-8 w-8 rounded-full",
-                "transition-all duration-200"
-              )}
+              className="hover:bg-slate-800/50 h-8 w-8 rounded-full"
               title="AI Settings"
             >
-              <Settings className="h-4 w-4 text-blue-500 dark:text-purple-400" />
+              <Settings className="h-4 w-4 text-cyan-400" />
             </Button>
           </SheetTrigger>
-          <SheetContent className="light-panel dark:dark-panel border-l border-blue-500/30 dark:border-purple-500/30 w-[350px] sm:w-[500px] backdrop-blur-xl">
+          <SheetContent className="cyber-panel border-l border-cyan-500/30 w-[350px] sm:w-[500px] backdrop-blur-xl">
             <AISettings 
               onClose={() => {}}
               onClear={handleClearSettings}
@@ -219,10 +212,7 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
         </Sheet>
       </div>
 
-      <ScrollArea className={cn(
-        "flex-1 p-4",
-        "bg-gradient-to-b from-slate-50/80 to-white/80 dark:from-slate-950/80 dark:to-slate-900/80"
-      )}>
+      <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-slate-900/80 to-slate-800/80">
         <div className="space-y-4 mb-4">
           {messages.map((message) => (
             <ChatMessage key={message.id} message={message} />
@@ -230,10 +220,7 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
         </div>
       </ScrollArea>
 
-      <div className={cn(
-        "p-3 border-t border-slate-200/50 dark:border-slate-700/50",
-        "bg-white/80 dark:bg-slate-900/90 backdrop-blur-md"
-      )}>
+      <div className="p-3 border-t border-slate-700/50 bg-slate-800/90 backdrop-blur-sm">
         <ChatInput onSendMessage={handleSendMessage} disabled={isProcessing} isProcessing={isProcessing} />
       </div>
     </div>
