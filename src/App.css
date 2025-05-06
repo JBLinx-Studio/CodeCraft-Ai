@@ -1,11 +1,8 @@
 
 /* Import modular CSS files */
-@import './styles/theme.css';
-@import './styles/navigation.css';
-@import './styles/panel-connections.css';
 @import './styles/code-panel.css';
+@import './styles/panel-connections.css';
 @import './styles/mode-sections.css';
-@import './styles/ui-components.css';
 
 /* Base styles for the app */
 #root {
@@ -13,4 +10,45 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+}
+
+/* Logo styles */
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+/* Logo animations */
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+/* Card styles */
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
 }
