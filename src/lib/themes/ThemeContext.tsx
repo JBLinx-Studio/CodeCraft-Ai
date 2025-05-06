@@ -15,13 +15,11 @@ export const ThemeContext = createContext<ThemeContextType>({
  */
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState<Theme>('light');
-  const [isInitialized, setIsInitialized] = useState(false);
   
   useEffect(() => {
     // Apply the saved theme when the app loads
     const initialTheme = getSavedTheme();
     updateTheme(initialTheme);
-    setIsInitialized(true);
   }, []);
   
   // Update theme function that also updates localStorage and document classes
@@ -30,11 +28,6 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     saveThemePreference(newTheme);
     applyThemeToDOM(newTheme);
   };
-  
-  if (!isInitialized) {
-    // If theme is not initialized yet, apply a minimal loading state
-    return <>{children}</>;
-  }
   
   return (
     <ThemeContext.Provider value={{ theme, setTheme: updateTheme }}>
