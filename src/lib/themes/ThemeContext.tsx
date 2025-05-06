@@ -1,27 +1,40 @@
 
 import { createContext, useState, useEffect, useContext, ReactNode } from "react";
-import { Theme, ThemeContextType } from './types';
-import { getSavedTheme, applyThemeToDOM, saveThemePreference } from './theme-utils';
+
+type Theme = "light" | "dark";
+
+type ThemeContextType = {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+};
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: 'light',
+  theme: "light",
   setTheme: () => {},
 });
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>("light");
   
   useEffect(() => {
     // Apply the saved theme when the app loads
-    const initialTheme = getSavedTheme();
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    
+    const initialTheme = (savedTheme === "dark" || (!savedTheme && prefersDark)) ? "dark" : "light";
     updateTheme(initialTheme);
   }, []);
   
   // Update theme function that also updates localStorage and document classes
-  const updateTheme = (newTheme: Theme): void => {
+  const updateTheme = (newTheme: Theme) => {
     setTheme(newTheme);
-    saveThemePreference(newTheme);
-    applyThemeToDOM(newTheme);
+    localStorage.setItem("theme", newTheme);
+    
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   };
   
   return (
