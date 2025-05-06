@@ -3,11 +3,16 @@ import { createContext, useState, useEffect, useContext, ReactNode } from "react
 import { Theme, ThemeContextType } from './types';
 import { getSavedTheme, applyThemeToDOM, saveThemePreference } from './theme-utils';
 
-const ThemeContext = createContext<ThemeContextType>({
+// Create the theme context with default values
+export const ThemeContext = createContext<ThemeContextType>({
   theme: 'light',
   setTheme: () => {},
 });
 
+/**
+ * Theme provider component that manages theme state
+ * and provides it to the application
+ */
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState<Theme>('light');
   
@@ -31,6 +36,19 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useTheme = () => useContext(ThemeContext);
+/**
+ * Custom hook to access the theme context
+ * @returns {ThemeContextType} The theme context
+ */
+export const useTheme = (): ThemeContextType => {
+  const context = useContext(ThemeContext);
+  
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  
+  return context;
+};
 
+// Default export for convenience
 export default ThemeContext;
