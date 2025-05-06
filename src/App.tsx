@@ -4,7 +4,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+
+// Theme provider
+import { ThemeProvider } from "./lib/themes/ThemeContext";
 
 // Pages
 import Home from "./pages/Home";
@@ -13,53 +16,12 @@ import Templates from "./pages/Templates";
 import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
 
-// Create theme context
-import { createContext } from "react";
-
-type ThemeContextType = {
-  theme: "light" | "dark";
-  setTheme: (theme: "light" | "dark") => void;
-};
-
-export const ThemeContext = createContext<ThemeContextType>({
-  theme: "light",
-  setTheme: () => {},
-});
-
 const App = () => {
   // Create a client inside the component function
   const [queryClient] = useState(() => new QueryClient());
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  
-  // Apply the saved theme when the app loads
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    
-    const initialTheme = (savedTheme === "dark" || (!savedTheme && prefersDark)) ? "dark" : "light";
-    setTheme(initialTheme);
-    
-    if (initialTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, []);
-  
-  // Update theme function that also updates localStorage and document classes
-  const updateTheme = (newTheme: "light" | "dark") => {
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-    
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  };
   
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: updateTheme }}>
+    <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
@@ -75,7 +37,7 @@ const App = () => {
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
-    </ThemeContext.Provider>
+    </ThemeProvider>
   );
 };
 
