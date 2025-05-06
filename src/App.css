@@ -6,6 +6,8 @@
 @import './styles/code-panel.css';
 @import './styles/mode-sections.css';
 @import './styles/ui-components.css';
+@import './styles/glassmorphism.css';
+@import './styles/animations.css';
 
 /* Base styles for the app */
 #root {

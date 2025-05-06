@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/themes";
 
 /**
- * Theme toggle component that switches between light and dark modes
+ * Enhanced theme toggle component with smoother transitions
  */
 const ThemeToggle = () => {
   const { theme, setTheme } = useTheme();
@@ -23,7 +23,9 @@ const ThemeToggle = () => {
       title={isDark ? "Switch to light theme" : "Switch to dark theme"}
       className={cn(
         "h-9 w-9 relative overflow-hidden transition-all duration-500",
-        isDark ? "border-purple-500/50 bg-slate-800/90" : "border-cyan-500/50 bg-white/90"
+        isDark 
+          ? "border-purple-500/50 bg-slate-800/90 hover:border-purple-500/80 hover:bg-slate-800/80" 
+          : "border-cyan-500/50 bg-white/90 hover:border-cyan-500/80 hover:bg-white/80"
       )}
     >
       <span

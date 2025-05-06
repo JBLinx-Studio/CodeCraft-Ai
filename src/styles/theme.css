@@ -5,6 +5,12 @@
 :root {
   --theme-blue: #0ea5e9;
   --theme-green: #10b981;
+  --theme-purple: #8b5cf6;
+  --theme-pink: #ec4899;
+  --theme-yellow: #eab308;
+  
+  /* Theme transitions */
+  --theme-transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .dark {
@@ -45,9 +51,23 @@
 
 /* Theme-specific UI elements */
 .premium-panel {
-  @apply bg-background/50 backdrop-blur-sm border border-border shadow-sm;
+  @apply bg-background/50 backdrop-blur-sm border border-border shadow-sm transition-all duration-300;
 }
 
 .premium-card {
-  @apply bg-card rounded-xl border border-border shadow-sm;
+  @apply bg-card rounded-xl border border-border shadow-sm transition-all duration-300;
+}
+
+/* Theme transition */
+body {
+  transition: var(--theme-transition);
+}
+
+/* Theme-specific shadows */
+.light .shadow-theme {
+  box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.1), 0 4px 6px -2px rgba(14, 165, 233, 0.05);
+}
+
+.dark .shadow-theme {
+  box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.15), 0 4px 6px -2px rgba(139, 92, 246, 0.1);
 }
