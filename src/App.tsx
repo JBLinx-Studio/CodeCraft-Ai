@@ -6,6 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 
+// Theme provider - import from the centralized theme exports
+import { ThemeProvider } from "./lib/themes";
+
 // Pages
 import Home from "./pages/Home";
 import Features from "./pages/Features";
@@ -13,53 +16,32 @@ import Templates from "./pages/Templates";
 import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
 
-// Create theme context
-import { createContext } from "react";
-
-type ThemeContextType = {
-  theme: "light" | "dark";
-  setTheme: (theme: "light" | "dark") => void;
-};
-
-export const ThemeContext = createContext<ThemeContextType>({
-  theme: "light",
-  setTheme: () => {},
-});
-
+/**
+ * Main application component
+ */
 const App = () => {
-  // Create a client inside the component function
-  const [queryClient] = useState(() => new QueryClient());
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  
-  // Apply the saved theme when the app loads
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    
-    const initialTheme = (savedTheme === "dark" || (!savedTheme && prefersDark)) ? "dark" : "light";
-    setTheme(initialTheme);
-    
-    if (initialTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
+  // Create a query client for data fetching
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60 * 1000, // 1 minute
+        retry: 1,
+      },
     }
+  }));
+
+  // Apply any initial app-wide effects
+  useEffect(() => {
+    // Apply smooth scrolling
+    document.documentElement.style.scrollBehavior = "smooth";
+    
+    return () => {
+      document.documentElement.style.scrollBehavior = "";
+    };
   }, []);
   
-  // Update theme function that also updates localStorage and document classes
-  const updateTheme = (newTheme: "light" | "dark") => {
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-    
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  };
-  
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: updateTheme }}>
+    <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
@@ -75,7 +57,7 @@ const App = () => {
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
-    </ThemeContext.Provider>
+    </ThemeProvider>
   );
 };
 
