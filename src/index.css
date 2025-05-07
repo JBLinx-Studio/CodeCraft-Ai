@@ -29,7 +29,7 @@
     --theme-blue: #3b82f6;
     --theme-green: #10b981;
     
-    /* Enhanced robotic AI theme colors */
+    /* New robotic AI theme colors */
     --cyber-blue: #1EAEDB;
     --cyber-purple: #8B5CF6;
     --cyber-green: #10B981;
@@ -94,23 +94,17 @@
     @apply shadow-[0_0_10px_rgba(59,130,246,0.3)];
   }
 
-  /* Enhanced background pattern for a futuristic AI look */
+  /* Even more zoomed-in background pattern for a futuristic look */
   .bg-code-pattern {
     background-color: #0f172a;
-    background-image: 
-      radial-gradient(#1e293b 1px, transparent 1px),
-      radial-gradient(#3b82f610 2px, transparent 2px);
-    background-size: 16px 16px, 48px 48px; 
-    background-position: 0 0, 8px 8px;
+    background-image: radial-gradient(#1e293b 1px, transparent 1px);
+    background-size: 16px 16px; /* More zoomed-in (was 20px) */
   }
 
   .dark .bg-code-pattern {
     background-color: #0f172a;
-    background-image: 
-      radial-gradient(#1e293b 1px, transparent 1px),
-      radial-gradient(#8b5cf610 2px, transparent 2px);
-    background-size: 16px 16px, 48px 48px;
-    background-position: 0 0, 8px 8px;
+    background-image: radial-gradient(#1e293b 1px, transparent 1px);
+    background-size: 16px 16px; /* More zoomed-in (was 20px) */
   }
 
   .hover-card {
@@ -152,7 +146,7 @@
     100% { left: 200%; }
   }
   
-  /* Enhanced cyberpunk-inspired animations */
+  /* New cyberpunk-inspired animations */
   .cyber-glitch {
     animation: glitch 1s ease-out infinite alternate-reverse;
   }
@@ -170,7 +164,7 @@
     box-shadow: 0 0 5px rgba(30, 174, 219, 0.5);
   }
   
-  /* Enhanced text gradient */
+  /* Text gradient */
   .text-gradient-primary {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400;
   }
@@ -245,7 +239,7 @@
     @apply bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/80 dark:border-slate-700/80 shadow-lg;
   }
 
-  /* Enhanced cyberpunk-inspired panel style */
+  /* New cyberpunk-inspired panel style */
   .cyber-panel {
     @apply bg-slate-900/90 backdrop-blur-xl border border-slate-700/50 shadow-lg rounded-xl;
     box-shadow: 0 5px 15px rgba(30, 174, 219, 0.2), inset 0 0 1px rgba(139, 92, 246, 0.5);
@@ -277,7 +271,7 @@
     @apply bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 rounded-xl transition-all duration-300;
   }
   
-  /* Enhanced cyberpunk-inspired card style */
+  /* New cyberpunk-inspired card style */
   .cyber-card {
     @apply bg-slate-800/40 backdrop-blur-md border border-slate-700/30 rounded-xl transition-all duration-300;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), inset 0 0 1px rgba(255, 255, 255, 0.2);
@@ -299,7 +293,7 @@
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   }
   
-  /* Enhanced cyber-theme hover effect */
+  /* Cyber-theme hover effect */
   .cyber-hover {
     transition: all 0.3s ease;
   }
@@ -322,7 +316,7 @@
     @apply bg-green-100/80 dark:bg-green-900/30 text-green-600 dark:text-green-400;
   }
   
-  /* Enhanced cyber-themed feature icons */
+  /* Cyber-themed feature icons */
   .cyber-icon {
     @apply w-12 h-12 rounded-lg flex items-center justify-center relative overflow-hidden;
     background: linear-gradient(135deg, rgba(30, 174, 219, 0.1), rgba(139, 92, 246, 0.1));
@@ -349,25 +343,5 @@
   
   .cyber-icon-green {
     color: var(--cyber-green);
-  }
-  
-  /* Added gradient border */
-  .border-gradient {
-    position: relative;
-    border: 1px solid transparent;
-    background-clip: padding-box;
-  }
-  
-  .border-gradient::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    margin: -1px;
-    border-radius: inherit;
-    background: linear-gradient(to right, #1EAEDB, #8B5CF6);
-    z-index: -1;
   }
 }
