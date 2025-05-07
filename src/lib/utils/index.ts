@@ -1,4 +1,9 @@
 
-import { extractCodeBlocks } from './extract-code';
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-export { extractCodeBlocks };
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+export * from "./code-extraction";

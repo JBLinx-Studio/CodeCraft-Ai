@@ -1,0 +1,35 @@
+
+/* Code panel styling */
+.code-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.dark .code-panel {
+  background-color: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(30, 41, 59, 0.8);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* Code header styles */
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(to right, rgba(219, 234, 254, 0.9), rgba(191, 219, 254, 0.8));
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+  border-bottom: 1px solid rgba(203, 213, 225, 0.8);
+}
+
+.dark .code-header {
+  background: linear-gradient(to right, rgba(30, 58, 138, 0.8), rgba(56, 189, 248, 0.1));
+  border-bottom: 1px solid rgba(51, 65, 85, 0.8);
+}

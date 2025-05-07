@@ -1,0 +1,39 @@
+
+/* Panel connection styling */
+.panel-connection {
+  position: relative;
+  overflow: visible;
+}
+
+.panel-connection::after {
+  content: '';
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(14, 165, 233, 0.6), rgba(139, 92, 246, 0.6));
+  animation: pulseOpacity 2s infinite ease-in-out;
+}
+
+.dark .panel-connection::after {
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.6), rgba(168, 85, 247, 0.6));
+}
+
+/* Panel connection variations */
+.panel-connection-horizontal::after {
+  top: 50%;
+  width: 20px;
+  transform: translateY(-50%);
+}
+
+.panel-connection-right::after {
+  right: -20px;
+}
+
+.panel-connection-left::after {
+  left: -20px;
+}
+
+/* Panel connection animation */
+@keyframes pulseOpacity {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
