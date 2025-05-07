@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
-import { Github, Code, Menu, ExternalLink } from "lucide-react";
+import { Github, Code, Moon, Sun, Menu, ExternalLink } from "lucide-react";
+import { useContext } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,13 +13,25 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
-import { useTheme } from "@/lib/themes/ThemeContext";
-import ThemeToggle from "./ThemeToggle";
+import { ThemeContext } from "@/App";
 
 export default function Header() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme } = useContext(ThemeContext);
   const location = useLocation();
   
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    toast(`${newTheme === "light" ? "Light" : "Dark"} mode activated`, {
+      description: `Visual preference updated`,
+      duration: 2000,
+    });
+  };
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+
   const handleUpgradeClick = () => {
     toast("Pro Upgrade", {
       description: "Redirecting to upgrade options",
@@ -27,10 +40,6 @@ export default function Header() {
         onClick: () => console.log("Viewing upgrade plans"),
       },
     });
-  };
-
-  const isActive = (path: string) => {
-    return location.pathname === path;
   };
 
   return (
@@ -59,7 +68,15 @@ export default function Header() {
             <Link to="/documentation" className={`nav-link ${isActive('/documentation') ? 'nav-link-active' : ''}`}>Docs</Link>
           </nav>
           
-          <ThemeToggle />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="rounded-full transition-all duration-300 hover:bg-primary/10"
+            onClick={toggleTheme}
+            title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+          >
+            {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+          </Button>
           
           <Button variant="outline" size="sm" className="gap-2 hidden sm:flex hover:bg-primary/10 hover:border-primary/30 transition-all duration-300">
             <Github className="w-4 h-4" />
