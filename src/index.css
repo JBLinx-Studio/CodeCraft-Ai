@@ -1,118 +1,232 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    /* Modern blue and green scheme */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 222 47% 11%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 1rem;
+    --popover-foreground: 222 47% 11%;
 
-    --theme-blue: #3b82f6;
-    --theme-green: #10b981;
+    --primary: 210 100% 50%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 162 84% 44%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 46%;
+
+    --accent: 174 84% 36%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 224 71% 4%;
+
+    --radius: 0.75rem;
   }
- 
+
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-  }
+    --background: 222 47% 10%;
+    --foreground: 210 40% 98%;
 
-  * {
-    @apply border-border;
-    scroll-behavior: smooth;
-  }
+    --card: 222 47% 12%;
+    --card-foreground: 210 40% 98%;
 
-  body {
-    @apply bg-background text-foreground antialiased;
+    --popover: 222 47% 12%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 100% 55%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 162 84% 42%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 32% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 174 84% 32%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 212 35% 65%;
   }
 }
 
-@layer components {
-  .glassmorphism-card {
-    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm;
-  }
-  
-  .glassmorphism-navbar {
-    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm;
-  }
-  
-  .nav-link {
-    @apply px-3 py-2 text-sm rounded-md transition-colors hover:bg-slate-100 dark:hover:bg-slate-800;
-  }
-  
-  .nav-link-active {
-    @apply bg-slate-100 dark:bg-slate-800 font-medium;
-  }
-  
-  .shadow-glow {
-    @apply shadow-[0_0_15px_rgba(59,130,246,0.5)];
-  }
-  
-  .shadow-glow-sm {
-    @apply shadow-[0_0_10px_rgba(59,130,246,0.3)];
+@layer base {
+  * {
+    @apply border-border;
   }
 
-  .bg-code-pattern {
-    background-color: #f8fafc;
-    background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
-    background-size: 20px 20px;
-  }
-
-  .dark .bg-code-pattern {
-    background-color: #0f172a;
-    background-image: radial-gradient(#1e293b 1px, transparent 1px);
-    background-size: 20px 20px;
-  }
-
-  .hover-card {
-    @apply transition-all duration-300 hover:shadow-md hover:scale-105 hover:bg-white dark:hover:bg-slate-800;
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
   
-  .animate-pulse-slow {
-    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight;
   }
-  
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
-  }
+}
+
+/* Glass morphism effects */
+.glassmorphism {
+  @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg border border-white/20 dark:border-slate-700/20 shadow-glass;
+}
+
+.glassmorphism-card {
+  @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/30 shadow-card rounded-xl;
+}
+
+.glassmorphism-navbar {
+  @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-white/20 dark:border-slate-700/20 shadow-sm;
+}
+
+/* Code-like styles */
+.code-panel {
+  @apply bg-slate-900 rounded-lg border border-slate-700/50 overflow-hidden font-mono text-sm text-slate-300 shadow-xl;
+}
+
+.code-header {
+  @apply bg-slate-800 px-4 py-3 border-b border-slate-700/50 flex items-center justify-between;
+}
+
+.code-content {
+  @apply p-4 overflow-x-auto;
+}
+
+.code-line {
+  @apply border-l-2 border-transparent pl-3 -ml-3 transition-colors hover:border-theme-blue;
+}
+
+.code-keyword {
+  @apply text-theme-blue;
+}
+
+.code-string {
+  @apply text-theme-green;
+}
+
+.code-comment {
+  @apply text-slate-500;
+}
+
+/* Modern UI Components */
+.modern-panel {
+  @apply bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-soft;
+}
+
+.feature-icon {
+  @apply w-10 h-10 rounded-lg flex items-center justify-center;
+}
+
+.feature-icon-blue {
+  @apply bg-blue-100 dark:bg-blue-900/30 text-theme-blue;
+}
+
+.feature-icon-green {
+  @apply bg-green-100 dark:bg-green-900/30 text-theme-green;
+}
+
+.feature-icon-teal {
+  @apply bg-teal-100 dark:bg-teal-900/30 text-theme-teal;
+}
+
+/* Advanced navigation */
+.nav-link {
+  @apply relative px-3 py-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-200;
+}
+
+.nav-link::after {
+  content: '';
+  @apply absolute left-0 bottom-0 w-0 h-0.5 bg-theme-blue transition-all duration-300 ease-out opacity-0;
+}
+
+.nav-link:hover::after {
+  @apply w-full opacity-100;
+}
+
+.nav-link-active {
+  @apply text-theme-blue dark:text-theme-blue;
+}
+
+.nav-link-active::after {
+  @apply w-full opacity-100;
+}
+
+/* Button styles */
+.button-primary {
+  @apply bg-gradient-to-r from-theme-blue to-theme-teal text-white px-4 py-2 rounded-lg hover:translate-y-[-2px] hover:shadow-lg transition-all duration-300;
+}
+
+.button-secondary {
+  @apply bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-300;
+}
+
+.button-outline {
+  @apply border border-theme-blue/30 text-theme-blue dark:text-theme-blue px-4 py-2 rounded-lg hover:bg-theme-blue/10 transition-all duration-300;
+}
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease forwards;
+}
+
+.animate-slide-right {
+  animation: slideRight 0.6s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideRight {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-400 dark:bg-slate-600;
 }

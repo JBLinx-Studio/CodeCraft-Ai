@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Github, Code, Moon, Sun, Menu, ExternalLink } from "lucide-react";
-import { useContext } from "react";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,43 +11,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Link, useLocation } from "react-router-dom";
-import { toast } from "sonner";
-import { ThemeContext } from "@/App";
+import { Link } from "react-router-dom";
 
 export default function Header() {
-  const { theme, setTheme } = useContext(ThemeContext);
-  const location = useLocation();
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   
   const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    toast(`${newTheme === "light" ? "Light" : "Dark"} mode activated`, {
-      description: `Visual preference updated`,
-      duration: 2000,
-    });
-  };
-
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
-
-  const handleUpgradeClick = () => {
-    toast("Pro Upgrade", {
-      description: "Redirecting to upgrade options",
-      action: {
-        label: "View Plans",
-        onClick: () => console.log("Viewing upgrade plans"),
-      },
-    });
+    setTheme(theme === "light" ? "dark" : "light");
+    // In a real app, you'd update the document class here
   };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glassmorphism-navbar">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-gradient-to-r from-theme-blue to-theme-green text-white transition-all duration-300 group-hover:scale-105 group-hover:shadow-glow">
+          <Link to="/" className="flex items-center gap-3">
+            <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-gradient-to-r from-theme-blue to-theme-green text-white">
               <Code className="h-5 w-5" />
             </div>
             <div className="flex flex-col items-start leading-none">
@@ -62,23 +41,22 @@ export default function Header() {
         
         <div className="flex items-center gap-4">
           <nav className="hidden md:flex items-center gap-1">
-            <Link to="/" className={`nav-link ${isActive('/') ? 'nav-link-active' : ''}`}>Home</Link>
-            <Link to="/features" className={`nav-link ${isActive('/features') ? 'nav-link-active' : ''}`}>Features</Link>
-            <Link to="/templates" className={`nav-link ${isActive('/templates') ? 'nav-link-active' : ''}`}>Templates</Link>
-            <Link to="/documentation" className={`nav-link ${isActive('/documentation') ? 'nav-link-active' : ''}`}>Docs</Link>
+            <Link to="/" className="nav-link nav-link-active">Home</Link>
+            <Link to="/features" className="nav-link">Features</Link>
+            <Link to="/templates" className="nav-link">Templates</Link>
+            <Link to="/documentation" className="nav-link">Docs</Link>
           </nav>
           
           <Button 
             variant="ghost" 
             size="icon" 
-            className="rounded-full transition-all duration-300 hover:bg-primary/10"
+            className="rounded-full"
             onClick={toggleTheme}
-            title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
           >
             {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </Button>
           
-          <Button variant="outline" size="sm" className="gap-2 hidden sm:flex hover:bg-primary/10 hover:border-primary/30 transition-all duration-300">
+          <Button variant="outline" size="sm" className="gap-2 hidden sm:flex">
             <Github className="w-4 h-4" />
             <span>GitHub</span>
           </Button>
@@ -86,8 +64,7 @@ export default function Header() {
           <Button 
             variant="default" 
             size="sm" 
-            className="gap-1.5 bg-gradient-to-r from-theme-blue to-theme-green hover:opacity-90 shadow-glow-sm hover:shadow-glow transition-all duration-300"
-            onClick={handleUpgradeClick}
+            className="gap-1.5 bg-gradient-to-r from-theme-blue to-theme-green hover:opacity-90 transition-opacity"
           >
             Upgrade Pro
             <ExternalLink className="w-3.5 h-3.5 ml-0.5" />
