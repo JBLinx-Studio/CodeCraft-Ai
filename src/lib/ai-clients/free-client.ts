@@ -1,3 +1,4 @@
+
 import { AIClient, AIClientOptions, AIRequestParams, AIServiceResponse } from "./base-client";
 import { extractCodeBlocks } from "@/lib/utils";
 
@@ -9,10 +10,6 @@ export class FreeAPIClient implements AIClient {
   private model: string;
   private apiKey: string | null;
   private isProcessingRequest: boolean = false;
-  private apiEndpoints: Array<{url: string, name: string, needsAuth: boolean}> = [
-    {url: "https://api-inference.huggingface.co/models/google/flan-t5-small", name: "flan-t5", needsAuth: false},
-    {url: "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2", name: "mistral-7b", needsAuth: false},
-  ];
   
   constructor(options: FreeClientOptions) {
     this.apiKey = options.apiKey;
@@ -34,35 +31,18 @@ export class FreeAPIClient implements AIClient {
       // Create a conversation-style prompt with history context
       const messages = this.formatMessagesForLLM(prompt, chatHistory);
       
-      // Try different API endpoints in sequence
-      for (const endpoint of this.apiEndpoints) {
-        try {
-          console.log(`Attempting to use ${endpoint.name} API...`);
-          const response = await this.callExternalAPI(messages, endpoint);
-          if (response && response.success) {
-            return response;
-          }
-        } catch (error) {
-          console.warn(`Error with ${endpoint.name} API:`, error);
-          // Continue to next endpoint
-        }
-      }
-      
-      // Enhanced fallback: If all APIs fail, try one last option with a simpler prompt
       try {
-        console.log("Trying simplified prompt fallback...");
-        const simplifiedResponse = await this.callInferenceAPI(
-          `Generate HTML, CSS and JavaScript for: ${prompt}`
-        );
-        
-        if (simplifiedResponse && simplifiedResponse.success) {
-          return simplifiedResponse;
+        // Try alternative inference API without authentication requirements
+        const response = await this.callInferenceAPI(messages);
+        if (response && response.success) {
+          return response;
         }
       } catch (error) {
-        console.warn("Simplified fallback failed:", error);
+        console.error("Error with Inference API:", error);
+        // Fall back to local processing if API fails
       }
       
-      // Final fallback: Create a more thoughtful response locally
+      // Fallback: Create a more thoughtful response locally
       return this.createLocalResponse(prompt, chatHistory);
     } catch (error) {
       console.error("FreeAPIClient error:", error);
@@ -75,64 +55,12 @@ export class FreeAPIClient implements AIClient {
     }
   }
   
-  private async callExternalAPI(messages: any[], endpoint: {url: string, name: string, needsAuth: boolean}): Promise<AIServiceResponse | null> {
+  private async callInferenceAPI(messages: any[]): Promise<AIServiceResponse> {
     try {
-      // Format the prompt based on the API
+      // Format the prompt for a public API model
       const lastMessage = messages[messages.length - 1];
       const userPrompt = lastMessage.content || "";
       
-      // Make API request with appropriate headers
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
-      
-      // Add authorization if needed and available
-      if (endpoint.needsAuth && this.apiKey) {
-        headers["Authorization"] = `Bearer ${this.apiKey}`;
-      }
-      
-      const response = await fetch(endpoint.url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          inputs: userPrompt,
-          options: {
-            wait_for_model: true
-          }
-        }),
-      });
-      
-      if (!response.ok) {
-        console.log(`${endpoint.name} API responded with status:`, response.status);
-        throw new Error(`API error: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      const generatedText = Array.isArray(data) && data.length > 0 ? data[0].generated_text : 
-                           (data.generated_text || data.text || data.output || JSON.stringify(data));
-      
-      // Extract any code blocks from the response
-      const { code, explanation } = extractCodeBlocks(generatedText);
-      
-      return {
-        success: true,
-        data: {
-          code: {
-            html: code.html || "",
-            css: code.css || "",
-            js: code.js || ""
-          },
-          explanation: explanation || generatedText
-        }
-      };
-    } catch (error) {
-      console.error(`Error calling ${endpoint.name} API:`, error);
-      throw error;
-    }
-  }
-  
-  private async callInferenceAPI(simplifiedPrompt: string): Promise<AIServiceResponse | null> {
-    try {
       // Use a public API that doesn't require authentication
       const response = await fetch("https://api-inference.huggingface.co/models/google/flan-t5-small", {
         method: "POST",
@@ -140,7 +68,7 @@ export class FreeAPIClient implements AIClient {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          inputs: simplifiedPrompt,
+          inputs: userPrompt,
           options: {
             wait_for_model: true
           }

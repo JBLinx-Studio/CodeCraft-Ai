@@ -33,7 +33,7 @@ export function useAI() {
     }
   }, []);
 
-  const saveApiKey = (key: string, provider: AIProvider, model?: string): boolean => {
+  const saveApiKey = (key: string, provider: AIProvider, model?: string) => {
     localStorage.setItem("webcraft_api_key", key);
     localStorage.setItem("webcraft_api_provider", provider);
     setUsingFreeAPI(provider === "FREE");
@@ -49,7 +49,7 @@ export function useAI() {
     return true;
   };
 
-  const setFreeAPI = (): boolean => {
+  const setFreeAPI = () => {
     localStorage.setItem("webcraft_api_key", FREE_API_KEY);
     localStorage.setItem("webcraft_api_provider", "FREE");
     localStorage.setItem("webcraft_using_free_api", "true");
@@ -59,7 +59,7 @@ export function useAI() {
     return true;
   };
 
-  const clearApiKey = (): boolean => {
+  const clearApiKey = () => {
     localStorage.removeItem("webcraft_api_key");
     localStorage.setItem("webcraft_using_free_api", "false");
     setApiKey(null);
@@ -97,12 +97,7 @@ export function useAI() {
             // Add assistant response to chat history
             const explanation = response.data.explanation || "Code generated successfully";
             addToChatHistory({role: "assistant", content: explanation});
-            
-            // Ensure we return a valid AIResponse with required code property
-            return {
-              code: response.data.code || { html: "", css: "", js: "" },
-              explanation: explanation
-            };
+            return response.data;
           } else {
             // If API call fails, log the error and fall back
             console.error("API call failed:", response.error);
@@ -111,13 +106,6 @@ export function useAI() {
               description: response.error || "Error connecting to AI service",
               variant: "destructive",
             });
-            
-            // Return error in standard AIResponse format
-            return {
-              code: { html: "", css: "", js: "" },
-              explanation: "",
-              error: response.error || "API call failed"
-            };
           }
         } catch (error) {
           console.error("Error calling AI service:", error);
@@ -126,13 +114,6 @@ export function useAI() {
             description: error instanceof Error ? error.message : "Error connecting to AI service",
             variant: "destructive",
           });
-          
-          // Return error in standard AIResponse format
-          return {
-            code: { html: "", css: "", js: "" },
-            explanation: "",
-            error: error instanceof Error ? error.message : "Unknown error"
-          };
         }
       }
       
@@ -145,10 +126,7 @@ export function useAI() {
         content: smartFallbackResponse.explanation || "Generated based on your request"
       });
       
-      return {
-        code: smartFallbackResponse.code || { html: "", css: "", js: "" },
-        explanation: smartFallbackResponse.explanation || ""
-      };
+      return smartFallbackResponse;
     } catch (error) {
       console.error("Error in generateCode:", error);
       toast({
@@ -162,11 +140,7 @@ export function useAI() {
         role: "assistant", 
         content: fallbackResponse.explanation || "Generated with fallback mode"
       });
-      
-      return {
-        code: fallbackResponse.code || { html: "", css: "", js: "" },
-        explanation: fallbackResponse.explanation || ""
-      };
+      return fallbackResponse;
     } finally {
       setIsProcessing(false);
     }
