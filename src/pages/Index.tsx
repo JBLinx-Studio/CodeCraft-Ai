@@ -10,6 +10,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Separator } from "@/components/ui/separator";
 import { Code, Zap, Layout, Star } from "lucide-react";
 import CompanyBranding from "@/components/CompanyBranding";
+import GitHubIntegration from "@/components/GitHubIntegration";
 
 const Index = () => {
   const [html, setHtml] = useState("");
@@ -97,7 +98,12 @@ const Index = () => {
           </div>
           
           <div className="lg:w-1/2 flex flex-col rounded-xl overflow-hidden premium-panel">
-            <PreviewPanel html={html} css={css} js={js} />
+            <PreviewPanel 
+              html={html} 
+              css={css} 
+              js={js} 
+              extraControls={html || css || js ? <GitHubIntegration html={html} css={css} js={js} /> : undefined}
+            />
           </div>
         </div>
         
@@ -132,8 +138,8 @@ const Index = () => {
                 <div className="w-10 h-10 rounded-lg mb-4 flex items-center justify-center bg-primary/10">
                   <Zap className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-heading font-semibold mb-2 text-lg">Production Export</h3>
-                <p className="text-sm text-muted-foreground">Deploy-ready code with optimized performance and accessibility</p>
+                <h3 className="font-heading font-semibold mb-2 text-lg">GitHub Integration</h3>
+                <p className="text-sm text-muted-foreground">Deploy-ready code with one-click GitHub repository creation</p>
               </div>
             </div>
             
@@ -176,7 +182,7 @@ const Index = () => {
                   </div>
                   <div className="premium-card p-6 w-full">
                     <h3 className="font-heading font-semibold mb-2">3. Deploy & Scale</h3>
-                    <p className="text-sm text-muted-foreground">Export production-ready code that's optimized for performance</p>
+                    <p className="text-sm text-muted-foreground">Export to GitHub and deploy your application with ease</p>
                   </div>
                 </div>
               </div>

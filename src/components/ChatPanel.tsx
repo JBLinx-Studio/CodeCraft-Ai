@@ -197,8 +197,10 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
               apiKey={apiKey || ""}
               usingFreeAPI={usingFreeAPI}
               onSave={handleApiSettingsChange}
-              apiProvider={apiProvider} // Fix: change provider to apiProvider
+              apiProvider={apiProvider}
               modelType={modelType}
+              onClear={clearApiKey}
+              onSetFreeAPI={setFreeAPI}
             />
           </SheetContent>
         </Sheet>
