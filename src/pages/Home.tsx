@@ -6,38 +6,32 @@ import { Toaster } from "@/components/ui/toaster";
 import { Code, Zap, Layout, Star, Terminal, ShieldCheck, CircuitBoard, Cpu, Database, MicrochipIcon, MonitorSmartphone, Circuit, Braces, ChevronsRight, ChevronsLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-
 const Home = () => {
   const [html, setHtml] = useState("");
   const [css, setCss] = useState("");
   const [js, setJs] = useState("");
   const [expandedChat, setExpandedChat] = useState(false);
   const [expandedPreview, setExpandedPreview] = useState(false);
-  
   const handleCodeGenerated = (html: string, css: string, js: string) => {
     setHtml(html);
     setCss(css);
     setJs(js);
   };
-  
   const toggleChatExpansion = () => {
     setExpandedChat(!expandedChat);
     if (expandedPreview) setExpandedPreview(false);
   };
-  
   const togglePreviewExpansion = () => {
     setExpandedPreview(!expandedPreview);
     if (expandedChat) setExpandedChat(false);
   };
-  
-  return (
-    <div className="min-h-screen flex flex-col bg-code-pattern bg-fixed">
+  return <div className="min-h-screen flex flex-col bg-code-pattern bg-fixed">
       <Header />
       
       <main className="flex-1 mt-16 flex flex-col">
         {/* Hero Section with enhanced cyberpunk styling */}
         <section className="relative overflow-hidden py-16 md:py-24">
-          <div className="absolute inset-0 bg-gradient-to-br from-theme-blue/10 to-theme-purple/10"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-theme-blue/5 to-theme-green/5 bg-[#31f1af]/0"></div>
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
           <div className="container relative z-10 px-4">
             <div className="max-w-4xl mx-auto text-center">
@@ -68,11 +62,9 @@ const Home = () => {
               </div>
               
               <div className="flex flex-wrap justify-center gap-3 mb-8 animate-fade-in">
-                {["React", "TypeScript", "Tailwind", "Full-stack", "API Integration"].map((tech) => (
-                  <span key={tech} className="px-3 py-1.5 cyber-card text-sm rounded-full border border-cyan-500/20 shadow-sm backdrop-blur-sm">
+                {["React", "TypeScript", "Tailwind", "Full-stack", "API Integration"].map(tech => <span key={tech} className="px-3 py-1.5 cyber-card text-sm rounded-full border border-cyan-500/20 shadow-sm backdrop-blur-sm">
                     {tech}
-                  </span>
-                ))}
+                  </span>)}
               </div>
             </div>
           </div>
@@ -113,20 +105,11 @@ const Home = () => {
               </div>
               
               {/* Interactive workspace with dynamic panel sizing */}
-              <div className={`grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-6 relative ${
-                expandedChat ? "lg:grid-cols-[2fr,1fr]" : 
-                expandedPreview ? "lg:grid-cols-[1fr,2fr]" : 
-                "lg:grid-cols-2"
-              }`}>
+              <div className={`grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-6 relative ${expandedChat ? "lg:grid-cols-[2fr,1fr]" : expandedPreview ? "lg:grid-cols-[1fr,2fr]" : "lg:grid-cols-2"}`}>
                 
                 {/* Left Panel - AI Chat with expansion toggle */}
                 <div className="relative">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={toggleChatExpansion}
-                    className="absolute -right-3 top-1/2 transform -translate-y-1/2 z-20 h-6 w-6 rounded-full bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 hover:bg-cyan-500/30 hidden lg:flex items-center justify-center"
-                  >
+                  <Button variant="ghost" size="icon" onClick={toggleChatExpansion} className="absolute -right-3 top-1/2 transform -translate-y-1/2 z-20 h-6 w-6 rounded-full bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 hover:bg-cyan-500/30 hidden lg:flex items-center justify-center">
                     {expandedChat ? <ChevronsLeft className="h-3 w-3 text-cyan-400" /> : <ChevronsRight className="h-3 w-3 text-cyan-400" />}
                   </Button>
                 
@@ -153,12 +136,7 @@ const Home = () => {
                 
                 {/* Right Panel - Live Preview with expansion toggle */}
                 <div className="relative">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={togglePreviewExpansion}
-                    className="absolute -left-3 top-1/2 transform -translate-y-1/2 z-20 h-6 w-6 rounded-full bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-purple-500/30 hover:bg-purple-500/30 hidden lg:flex items-center justify-center"
-                  >
+                  <Button variant="ghost" size="icon" onClick={togglePreviewExpansion} className="absolute -left-3 top-1/2 transform -translate-y-1/2 z-20 h-6 w-6 rounded-full bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-purple-500/30 hover:bg-purple-500/30 hidden lg:flex items-center justify-center">
                     {expandedPreview ? <ChevronsRight className="h-3 w-3 text-purple-400" /> : <ChevronsLeft className="h-3 w-3 text-purple-400" />}
                   </Button>
                 
@@ -331,8 +309,6 @@ const Home = () => {
       </footer>
       
       <Toaster />
-    </div>
-  );
+    </div>;
 };
-
 export default Home;
