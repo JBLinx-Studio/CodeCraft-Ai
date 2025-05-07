@@ -1,23 +1,22 @@
 
-import { AIClient, AIClientOptions, AIRequestParams, AIServiceResponse } from "./base-client";
-import { AIProvider } from "@/types";
+import { AIClient, AIClientOptions, AIRequestParams } from "./base-client";
+import { AIServiceResponse } from "@/types";
 
 export interface OpenAIClientOptions extends AIClientOptions {
   model?: string;
 }
 
-export class OpenAIClient implements AIClient {
+export class OpenAIClient extends AIClient {
   private model: string;
-  private apiKey: string | null;
   
   constructor(options: OpenAIClientOptions) {
-    this.apiKey = options.apiKey;
+    super(options);
     this.model = options.model || "gpt-3.5-turbo";
   }
   
   async generateResponse(params: AIRequestParams): Promise<AIServiceResponse> {
     try {
-      const { prompt, chatHistory = [] } = params;
+      const { prompt, chatHistory } = params;
       
       const systemPrompt = `${this.createEnhancedSystemPrompt()}
 
@@ -41,7 +40,7 @@ Please provide your response in this specific JSON format:
           messages: [
             { role: "system", content: systemPrompt },
             ...chatHistory.slice(-5), // Include last 5 messages for context
-            { role: "user", content: this.enhancePromptWithContext(prompt) }
+            { role: "user", content: this.enhancePromptWithContext(prompt, []) }
           ],
           temperature: 0.7,
           max_tokens: 4000
@@ -63,20 +62,6 @@ Please provide your response in this specific JSON format:
         error: error instanceof Error ? error.message : "Unknown error occurred" 
       };
     }
-  }
-  
-  createEnhancedPrompt(prompt: string, chatHistory?: Array<{ role: string; content: string }>): string {
-    return `Generate a web application based on this description: ${prompt}`;
-  }
-
-  private createEnhancedSystemPrompt(): string {
-    return `You are a helpful AI assistant that specializes in web development. 
-    Your task is to generate high-quality, functional HTML, CSS, and JavaScript code based on user requests.
-    Provide well-commented, clean code that follows best practices.`;
-  }
-
-  private enhancePromptWithContext(prompt: string): string {
-    return this.createEnhancedPrompt(prompt);
   }
   
   private parseResponse(data: any): AIServiceResponse {

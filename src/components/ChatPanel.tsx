@@ -17,9 +17,16 @@ export interface ChatPanelProps {
 }
 
 export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
-  const { generateCode, isProcessing, apiKey, usingFreeAPI, saveApiKey, clearApiKey, setFreeAPI } = useAI();
   const [messages, setMessages] = useState<Message[]>([]);
   const [showSettings, setShowSettings] = useState(false);
+  const { 
+    isProcessing,
+    generateCode,
+    apiKey,
+    usingFreeAPI,
+    saveApiKey,
+    setFreeAPI
+  } = useAI();
   const [hasAuthError, setHasAuthError] = useState(false);
 
   useEffect(() => {
@@ -153,15 +160,11 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
     }
   };
 
-  // Pass apiKey and usingFreeAPI to AISettings
-  // Use a single handleApiSettingsChange function that will call the appropriate functions
-  const handleApiSettingsChange = (key: string | null, useFreeApi: boolean) => {
+  const handleApiKeyChange = (key: string | null, useFreeApi: boolean) => {
     if (useFreeApi) {
       setFreeAPI();
     } else if (key) {
-      saveApiKey(key, "PERPLEXITY", "SMALL");
-    } else {
-      clearApiKey();
+      saveApiKey(key, useFreeApi ? "FREE" : "PERPLEXITY");
     }
     setHasAuthError(false);
   };
@@ -183,9 +186,9 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
       {showSettings && (
         <AISettings 
           onClose={() => setShowSettings(false)}
-          apiKey={apiKey || ""}
+          apiKey={apiKey}
           usingFreeAPI={usingFreeAPI}
-          onSave={handleApiSettingsChange}
+          onApiKeyChange={handleApiKeyChange}
         />
       )}
 
@@ -198,7 +201,11 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
       </ScrollArea>
 
       <div className="p-2 border-t bg-background/50 backdrop-blur-sm">
-        <ChatInput onSendMessage={handleSendMessage} disabled={isProcessing} isProcessing={isProcessing} />
+        <ChatInput 
+          onSendMessage={handleSendMessage} 
+          disabled={isProcessing}
+          isProcessing={isProcessing}
+        />
       </div>
     </div>
   );

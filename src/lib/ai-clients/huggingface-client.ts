@@ -1,22 +1,22 @@
 
-import { AIClient, AIClientOptions, AIRequestParams, AIServiceResponse } from "./base-client";
+import { AIClient, AIClientOptions, AIRequestParams } from "./base-client";
+import { AIServiceResponse } from "@/types";
 
 export interface HuggingFaceClientOptions extends AIClientOptions {
   model?: string;
 }
 
-export class HuggingFaceClient implements AIClient {
+export class HuggingFaceClient extends AIClient {
   private model: string;
-  private apiKey: string | null;
   
   constructor(options: HuggingFaceClientOptions) {
-    this.apiKey = options.apiKey;
+    super(options);
     this.model = options.model || "HuggingFaceH4/zephyr-7b-beta";
   }
   
   async generateResponse(params: AIRequestParams): Promise<AIServiceResponse> {
     try {
-      const { prompt, chatHistory = [] } = params;
+      const { prompt, chatHistory } = params;
       
       // Create an enhanced prompt
       const enhancedPrompt = this.createEnhancedPrompt(prompt, chatHistory);
@@ -121,7 +121,7 @@ export class HuggingFaceClient implements AIClient {
     }
   }
   
-  createEnhancedPrompt(userPrompt: string, history: Array<{role: string, content: string}> = []): string {
+  private createEnhancedPrompt(userPrompt: string, history: Array<{role: string, content: string}>) {
     return `
 ${this.createEnhancedSystemPrompt()}
 
@@ -150,15 +150,5 @@ ${userPrompt}
 
 ${history.length > 0 ? `CONVERSATION HISTORY:\n${this.formatChatHistory(history)}` : ""}
 `;
-  }
-
-  private createEnhancedSystemPrompt(): string {
-    return `You are a helpful AI assistant that specializes in web development. 
-    Your task is to generate high-quality, functional HTML, CSS, and JavaScript code based on user requests.
-    Provide well-commented, clean code that follows best practices.`;
-  }
-
-  private formatChatHistory(history: Array<{ role: string; content: string }>): string {
-    return history.map(msg => `${msg.role}: ${msg.content}`).join('\n');
   }
 }

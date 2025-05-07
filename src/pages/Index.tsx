@@ -1,22 +1,56 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
-import { ChatPanel } from "@/components/ChatPanel"; // Changed to named import
+import { ChatPanel } from "@/components/ChatPanel";
 import PreviewPanel from "@/components/PreviewPanel";
 import TemplateGallery from "@/components/TemplateGallery";
 import { Template } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Toaster } from "@/components/ui/toaster";
 import { Separator } from "@/components/ui/separator";
-import { Code, Zap, Layout, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Code, Zap, Layout } from "lucide-react";
+import Star from "@/components/Star";
 import CompanyBranding from "@/components/CompanyBranding";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [html, setHtml] = useState("");
   const [css, setCss] = useState("");
   const [js, setJs] = useState("");
   const [activeTab, setActiveTab] = useState<string>("chat");
   const [showWelcome, setShowWelcome] = useState(true);
+  
+  // Check if we have a selected template from the templates page
+  useEffect(() => {
+    const selectedTemplate = localStorage.getItem("selected_template");
+    if (selectedTemplate) {
+      try {
+        const template = JSON.parse(selectedTemplate);
+        if (template && template.code) {
+          // Set template code
+          setHtml(template.code.html || "");
+          setCss(template.code.css || "");
+          setJs(template.code.js || "");
+          
+          // Hide welcome message since we have a template
+          setShowWelcome(false);
+          
+          // Show toast notification
+          toast.success(`${template.name} template loaded`, {
+            description: "You can now customize it with the AI assistant"
+          });
+          
+          // Clear selected template after loading
+          localStorage.removeItem("selected_template");
+        }
+      } catch (error) {
+        console.error("Error parsing selected template:", error);
+      }
+    }
+  }, []);
   
   const handleCodeGenerated = (html: string, css: string, js: string) => {
     setHtml(html);
@@ -26,7 +60,8 @@ const Index = () => {
   };
   
   const handleSelectTemplate = (template: Template) => {
-    setActiveTab("chat");
+    // Navigate to templates page to get more details
+    navigate("/templates");
   };
   
   return (
@@ -79,6 +114,7 @@ const Index = () => {
                   <TabsTrigger 
                     value="templates" 
                     className="rounded-t-lg border-b-2 border-transparent py-3 px-4 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-medium"
+                    onClick={() => navigate("/templates")}
                   >
                     <Layout className="h-3.5 w-3.5 mr-1.5" />
                     Templates
@@ -91,13 +127,35 @@ const Index = () => {
               </TabsContent>
               
               <TabsContent value="templates" className="flex-1 p-0 m-0">
-                <TemplateGallery onSelectTemplate={handleSelectTemplate} />
+                <div className="p-4">
+                  <p className="text-center py-8">
+                    Please visit the Templates page for a full gallery of templates.
+                  </p>
+                  <Button onClick={() => navigate("/templates")} className="w-full">
+                    Browse Template Gallery
+                  </Button>
+                </div>
               </TabsContent>
             </Tabs>
           </div>
           
           <div className="lg:w-1/2 flex flex-col rounded-xl overflow-hidden premium-panel">
             <PreviewPanel html={html} css={css} js={js} />
+          </div>
+        </div>
+        
+        {/* License & Copyright */}
+        <div className="container mb-8">
+          <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+            <h3 className="font-semibold mb-2">License Information</h3>
+            <p className="text-sm text-muted-foreground">
+              All code generated through this platform is protected by the JBLinx Studio License.
+              Copyright © {new Date().getFullYear()} JBLinx Studio. All rights reserved.
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Generated code is provided for the exclusive use of the user, and may not be reproduced,
+              distributed, or used to create derivative works without explicit permission from JBLinx Studio.
+            </p>
           </div>
         </div>
         

@@ -97,12 +97,7 @@ export function useAI() {
             // Add assistant response to chat history
             const explanation = response.data.explanation || "Code generated successfully";
             addToChatHistory({role: "assistant", content: explanation});
-            
-            // Ensure we return a valid AIResponse with required code property
-            return {
-              code: response.data.code || { html: "", css: "", js: "" },
-              explanation: explanation
-            };
+            return response.data;
           } else {
             // If API call fails, log the error and fall back
             console.error("API call failed:", response.error);
@@ -131,10 +126,7 @@ export function useAI() {
         content: smartFallbackResponse.explanation || "Generated based on your request"
       });
       
-      return {
-        code: smartFallbackResponse.code || { html: "", css: "", js: "" },
-        explanation: smartFallbackResponse.explanation || ""
-      };
+      return smartFallbackResponse;
     } catch (error) {
       console.error("Error in generateCode:", error);
       toast({
@@ -148,11 +140,7 @@ export function useAI() {
         role: "assistant", 
         content: fallbackResponse.explanation || "Generated with fallback mode"
       });
-      
-      return {
-        code: fallbackResponse.code || { html: "", css: "", js: "" },
-        explanation: fallbackResponse.explanation || ""
-      };
+      return fallbackResponse;
     } finally {
       setIsProcessing(false);
     }
