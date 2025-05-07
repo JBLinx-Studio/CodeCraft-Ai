@@ -6,8 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 
-// Theme provider - import from the centralized theme exports
-import { ThemeProvider } from "./lib/themes";
+// Theme provider
+import { ThemeProvider } from "./lib/themes/ThemeContext";
 
 // Pages
 import Home from "./pages/Home";
@@ -16,19 +16,9 @@ import Templates from "./pages/Templates";
 import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
 
-/**
- * Main application component
- */
 const App = () => {
-  // Create a query client for data fetching
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 60 * 1000, // 1 minute
-        retry: 1,
-      },
-    }
-  }));
+  // Create a client inside the component function
+  const [queryClient] = useState(() => new QueryClient());
   
   return (
     <ThemeProvider>
