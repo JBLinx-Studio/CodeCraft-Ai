@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { nanoid } from "nanoid";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
-import { Message } from "@/types";
+import { Message, AIProvider } from "@/types";
 import AISettings from "./AISettings";
 import { Settings } from "lucide-react";
 import { Button } from "./ui/button";
@@ -17,7 +17,7 @@ export interface ChatPanelProps {
 }
 
 export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
-  const { generateCode, isProcessing, apiKey, usingFreeAPI, saveApiKey, clearApiKey, setFreeAPI } = useAI();
+  const { generateCode, isProcessing, apiKey, usingFreeAPI, apiProvider, modelType, saveApiKey, clearApiKey, setFreeAPI } = useAI();
   const [messages, setMessages] = useState<Message[]>([]);
   const [showSettings, setShowSettings] = useState(false);
   const [hasAuthError, setHasAuthError] = useState(false);
@@ -153,17 +153,20 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
     }
   };
 
-  // Pass apiKey and usingFreeAPI to AISettings
-  // Use a single handleApiSettingsChange function that will call the appropriate functions
-  const handleApiSettingsChange = (key: string | null, useFreeApi: boolean) => {
-    if (useFreeApi) {
+  // Fix the handler to match AISettings props signature
+  const handleApiSettingsChange = (key: string, provider: AIProvider, modelType?: string) => {
+    if (provider === "FREE") {
       setFreeAPI();
+      return true;
     } else if (key) {
-      saveApiKey(key, "PERPLEXITY", "SMALL");
+      saveApiKey(key, provider, modelType);
+      return true;
     } else {
       clearApiKey();
+      return true;
     }
     setHasAuthError(false);
+    return true;
   };
 
   return (
@@ -186,6 +189,8 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
           apiKey={apiKey || ""}
           usingFreeAPI={usingFreeAPI}
           onSave={handleApiSettingsChange}
+          selectedProvider={apiProvider}
+          selectedModel={modelType}
         />
       )}
 

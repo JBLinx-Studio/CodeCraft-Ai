@@ -33,7 +33,7 @@ export function useAI() {
     }
   }, []);
 
-  const saveApiKey = (key: string, provider: AIProvider, model?: string) => {
+  const saveApiKey = (key: string, provider: AIProvider, model?: string): boolean => {
     localStorage.setItem("webcraft_api_key", key);
     localStorage.setItem("webcraft_api_provider", provider);
     setUsingFreeAPI(provider === "FREE");
@@ -49,7 +49,7 @@ export function useAI() {
     return true;
   };
 
-  const setFreeAPI = () => {
+  const setFreeAPI = (): boolean => {
     localStorage.setItem("webcraft_api_key", FREE_API_KEY);
     localStorage.setItem("webcraft_api_provider", "FREE");
     localStorage.setItem("webcraft_using_free_api", "true");
@@ -59,7 +59,7 @@ export function useAI() {
     return true;
   };
 
-  const clearApiKey = () => {
+  const clearApiKey = (): boolean => {
     localStorage.removeItem("webcraft_api_key");
     localStorage.setItem("webcraft_using_free_api", "false");
     setApiKey(null);
@@ -111,6 +111,13 @@ export function useAI() {
               description: response.error || "Error connecting to AI service",
               variant: "destructive",
             });
+            
+            // Return error in standard AIResponse format
+            return {
+              code: { html: "", css: "", js: "" },
+              explanation: "",
+              error: response.error || "API call failed"
+            };
           }
         } catch (error) {
           console.error("Error calling AI service:", error);
@@ -119,6 +126,13 @@ export function useAI() {
             description: error instanceof Error ? error.message : "Error connecting to AI service",
             variant: "destructive",
           });
+          
+          // Return error in standard AIResponse format
+          return {
+            code: { html: "", css: "", js: "" },
+            explanation: "",
+            error: error instanceof Error ? error.message : "Unknown error"
+          };
         }
       }
       
