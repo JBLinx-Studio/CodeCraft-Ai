@@ -94,17 +94,17 @@
     @apply shadow-[0_0_10px_rgba(59,130,246,0.3)];
   }
 
-  /* More zoomed-in background pattern for a futuristic look */
+  /* Even more zoomed-in background pattern for a futuristic look */
   .bg-code-pattern {
     background-color: #0f172a;
     background-image: radial-gradient(#1e293b 1px, transparent 1px);
-    background-size: 20px 20px; /* Even more zoomed-in (was 25px) */
+    background-size: 16px 16px; /* More zoomed-in (was 20px) */
   }
 
   .dark .bg-code-pattern {
     background-color: #0f172a;
     background-image: radial-gradient(#1e293b 1px, transparent 1px);
-    background-size: 20px 20px; /* Even more zoomed-in (was 25px) */
+    background-size: 16px 16px; /* More zoomed-in (was 20px) */
   }
 
   .hover-card {
@@ -122,6 +122,28 @@
 
   .animate-slide-up {
     animation: slideUp 0.8s ease-out forwards;
+  }
+  
+  /* Data-flow animation */
+  .data-flow {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .data-flow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
+    animation: dataFlow 2s infinite;
+  }
+  
+  @keyframes dataFlow {
+    0% { left: -100%; }
+    100% { left: 200%; }
   }
   
   /* New cyberpunk-inspired animations */
@@ -145,6 +167,25 @@
   /* Text gradient */
   .text-gradient-primary {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400;
+  }
+  
+  /* Connection effect for the panels */
+  .connected-panel {
+    position: relative;
+  }
+  
+  .connected-panel::after {
+    content: '';
+    position: absolute;
+    width: 50px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cyber-blue), var(--cyber-purple));
+    animation: pulseWidth 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulseWidth {
+    0%, 100% { width: 30px; opacity: 0.6; }
+    50% { width: 50px; opacity: 1; }
   }
 
   @keyframes fadeIn {

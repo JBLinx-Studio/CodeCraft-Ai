@@ -1,10 +1,9 @@
-
 import Header from "@/components/Header";
 import { ChatPanel } from "@/components/ChatPanel";
 import PreviewPanel from "@/components/PreviewPanel";
 import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
-import { Code, Zap, Layout, Star, Terminal, ShieldCheck, CircuitBoard, Cpu, Database, MicrochipIcon, MonitorSmartphone } from "lucide-react";
+import { Code, Zap, Layout, Star, Terminal, ShieldCheck, CircuitBoard, Cpu, Database, MicrochipIcon, MonitorSmartphone, Circuit, Braces, ChevronsRight, ChevronsLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -12,11 +11,23 @@ const Home = () => {
   const [html, setHtml] = useState("");
   const [css, setCss] = useState("");
   const [js, setJs] = useState("");
+  const [expandedChat, setExpandedChat] = useState(false);
+  const [expandedPreview, setExpandedPreview] = useState(false);
   
   const handleCodeGenerated = (html: string, css: string, js: string) => {
     setHtml(html);
     setCss(css);
     setJs(js);
+  };
+  
+  const toggleChatExpansion = () => {
+    setExpandedChat(!expandedChat);
+    if (expandedPreview) setExpandedPreview(false);
+  };
+  
+  const togglePreviewExpansion = () => {
+    setExpandedPreview(!expandedPreview);
+    if (expandedChat) setExpandedChat(false);
   };
   
   return (
@@ -67,7 +78,7 @@ const Home = () => {
           </div>
         </section>
         
-        {/* AI Workspace Section - Enhanced with better visual connection */}
+        {/* Improved AI Workspace Section - Interconnected panels with expandable functionality */}
         <section className="py-16 bg-gradient-to-b from-background to-slate-900/80 dark:from-background dark:to-slate-900/80 relative">
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent"></div>
           <div className="container px-4">
@@ -85,39 +96,100 @@ const Home = () => {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative">
-              {/* Connection line between panels */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2 z-10 hidden lg:block">
-                <div className="flex items-center gap-2">
-                  <div className="h-[2px] w-8 bg-gradient-to-r from-cyan-500 to-transparent"></div>
-                  <div className="h-6 w-6 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 flex items-center justify-center shadow-glow-sm cyber-pulse">
-                    <Code className="h-3 w-3 text-white" />
+            {/* Enhanced interconnected workspace */}
+            <div className="relative">
+              {/* Data flow visualization between panels */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2 z-10 hidden lg:flex flex-col items-center">
+                <div className="h-[20px] w-[2px] bg-gradient-to-b from-cyan-500 to-transparent"></div>
+                <div className="h-10 w-10 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 flex items-center justify-center shadow-glow-sm cyber-pulse mb-2">
+                  <Cpu className="h-5 w-5 text-white" />
+                </div>
+                <div className="h-[20px] w-[2px] bg-gradient-to-b from-transparent to-purple-500 mb-2"></div>
+                <div className="flex items-center gap-2 animate-pulse-slow">
+                  <div className="h-[2px] w-20 bg-gradient-to-r from-cyan-500 to-transparent"></div>
+                  <div className="h-4 w-4 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 flex items-center justify-center shadow-glow-sm"></div>
+                  <div className="h-[2px] w-20 bg-gradient-to-r from-transparent to-purple-500"></div>
+                </div>
+              </div>
+              
+              {/* Interactive workspace with dynamic panel sizing */}
+              <div className={`grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-6 relative ${
+                expandedChat ? "lg:grid-cols-[2fr,1fr]" : 
+                expandedPreview ? "lg:grid-cols-[1fr,2fr]" : 
+                "lg:grid-cols-2"
+              }`}>
+                
+                {/* Left Panel - AI Chat with expansion toggle */}
+                <div className="relative">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={toggleChatExpansion}
+                    className="absolute -right-3 top-1/2 transform -translate-y-1/2 z-20 h-6 w-6 rounded-full bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 hover:bg-cyan-500/30 hidden lg:flex items-center justify-center"
+                  >
+                    {expandedChat ? <ChevronsLeft className="h-3 w-3 text-cyan-400" /> : <ChevronsRight className="h-3 w-3 text-cyan-400" />}
+                  </Button>
+                
+                  <div className="relative p-1">
+                    <div className="absolute -top-1 left-10 right-10 h-[1px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
+                    <div className="absolute -bottom-1 left-20 right-20 h-[1px] bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+                    <div className="absolute -left-1 top-10 bottom-10 w-[1px] bg-gradient-to-b from-transparent via-cyan-500 to-transparent"></div>
+                    <div className="absolute -right-1 top-20 bottom-20 w-[1px] bg-gradient-to-b from-transparent via-purple-500 to-transparent"></div>
+                    
+                    {/* Increased height for chat panel */}
+                    <div className="h-[600px] overflow-hidden">
+                      <ChatPanel onCodeGenerated={handleCodeGenerated} />
+                    </div>
+                    
+                    {/* Interconnection indicator */}
+                    <div className="absolute bottom-3 right-3">
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-2 w-2 rounded-full bg-cyan-500 animate-pulse"></div>
+                        <div className="text-xs text-cyan-500">Connected to Preview</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="h-[2px] w-8 bg-gradient-to-r from-transparent to-purple-500"></div>
+                </div>
+                
+                {/* Right Panel - Live Preview with expansion toggle */}
+                <div className="relative">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={togglePreviewExpansion}
+                    className="absolute -left-3 top-1/2 transform -translate-y-1/2 z-20 h-6 w-6 rounded-full bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-purple-500/30 hover:bg-purple-500/30 hidden lg:flex items-center justify-center"
+                  >
+                    {expandedPreview ? <ChevronsRight className="h-3 w-3 text-purple-400" /> : <ChevronsLeft className="h-3 w-3 text-purple-400" />}
+                  </Button>
+                
+                  <div className="relative p-1">
+                    <div className="absolute -top-1 left-10 right-10 h-[1px] bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+                    <div className="absolute -bottom-1 left-20 right-20 h-[1px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
+                    <div className="absolute -left-1 top-10 bottom-10 w-[1px] bg-gradient-to-b from-transparent via-purple-500 to-transparent"></div>
+                    <div className="absolute -right-1 top-20 bottom-20 w-[1px] bg-gradient-to-b from-transparent via-cyan-500 to-transparent"></div>
+                    
+                    {/* Matched height with chat panel */}
+                    <div className="h-[600px] overflow-hidden">
+                      <PreviewPanel html={html} css={css} js={js} />
+                    </div>
+                    
+                    {/* Interconnection indicator */}
+                    <div className="absolute bottom-3 left-3">
+                      <div className="flex items-center gap-1.5">
+                        <div className="text-xs text-purple-500">Receiving from AI</div>
+                        <div className="h-2 w-2 rounded-full bg-purple-500 animate-pulse"></div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               
-              {/* Left Panel - AI Chat */}
-              <div className="relative p-1">
-                <div className="absolute -top-1 left-10 right-10 h-[1px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
-                <div className="absolute -bottom-1 left-20 right-20 h-[1px] bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
-                <div className="absolute -left-1 top-10 bottom-10 w-[1px] bg-gradient-to-b from-transparent via-cyan-500 to-transparent"></div>
-                <div className="absolute -right-1 top-20 bottom-20 w-[1px] bg-gradient-to-b from-transparent via-purple-500 to-transparent"></div>
-                
-                <div className="h-[500px] overflow-hidden">
-                  <ChatPanel onCodeGenerated={handleCodeGenerated} />
-                </div>
-              </div>
-              
-              {/* Right Panel - Live Preview */}
-              <div className="relative p-1">
-                <div className="absolute -top-1 left-10 right-10 h-[1px] bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
-                <div className="absolute -bottom-1 left-20 right-20 h-[1px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
-                <div className="absolute -left-1 top-10 bottom-10 w-[1px] bg-gradient-to-b from-transparent via-purple-500 to-transparent"></div>
-                <div className="absolute -right-1 top-20 bottom-20 w-[1px] bg-gradient-to-b from-transparent via-cyan-500 to-transparent"></div>
-                
-                <div className="h-[500px] overflow-hidden">
-                  <PreviewPanel html={html} css={css} js={js} />
+              {/* Data flow visualization beneath panels */}
+              <div className="flex justify-center mt-6">
+                <div className="bg-slate-800/70 backdrop-blur-sm p-2 rounded-lg border border-cyan-500/20 flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full bg-cyan-500 animate-pulse"></div>
+                  <span className="text-xs text-slate-300">Real-time code generation and preview</span>
+                  <div className="h-3 w-3 rounded-full bg-purple-500 animate-pulse"></div>
                 </div>
               </div>
             </div>
@@ -233,6 +305,7 @@ const Home = () => {
         </section>
       </main>
       
+      {/* Footer */}
       <footer className="border-t border-slate-200/20 dark:border-slate-800/20 bg-gradient-to-b from-slate-900/80 to-slate-800/80 backdrop-blur-sm relative">
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/20 to-transparent"></div>
         <div className="container py-8 px-4 text-sm">
