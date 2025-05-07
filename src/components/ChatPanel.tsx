@@ -170,21 +170,14 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
     return true;
   };
 
-  // Added onClear handler to fix TypeScript error
-  const handleClearSettings = () => {
-    clearApiKey();
-    setHasAuthError(false);
-    return true;
-  };
-
   return (
     <div className="flex flex-col h-full cyber-panel overflow-hidden">
       <div className="flex justify-between items-center p-3 border-b bg-gradient-to-r from-slate-800/90 to-slate-900/90">
         <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 flex items-center justify-center shadow-glow-sm cyber-pulse">
-            <Zap className="h-4 w-4 text-white" />
+          <div className="h-6 w-6 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 flex items-center justify-center shadow-glow-sm pulse cyber-pulse">
+            <Zap className="h-3.5 w-3.5 text-white" />
           </div>
-          <h2 className="font-medium text-base bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400">AI Assistant</h2>
+          <h2 className="font-medium text-sm bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400">AI Assistant</h2>
         </div>
         
         <Sheet>
@@ -198,14 +191,13 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
               <Settings className="h-4 w-4 text-cyan-400" />
             </Button>
           </SheetTrigger>
-          <SheetContent className="cyber-panel border-l border-cyan-500/30 w-[350px] sm:w-[500px] backdrop-blur-xl">
+          <SheetContent className="cyber-panel border-l border-cyan-500/30 w-[350px] sm:w-[450px] backdrop-blur-xl">
             <AISettings 
               onClose={() => {}}
-              onClear={handleClearSettings}
               apiKey={apiKey || ""}
               usingFreeAPI={usingFreeAPI}
               onSave={handleApiSettingsChange}
-              apiProvider={apiProvider}
+              apiProvider={apiProvider} // Fix: change provider to apiProvider
               modelType={modelType}
             />
           </SheetContent>
@@ -220,7 +212,7 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
         </div>
       </ScrollArea>
 
-      <div className="p-3 border-t border-slate-700/50 bg-slate-800/90 backdrop-blur-sm">
+      <div className="p-2 border-t border-slate-700/50 bg-slate-800/90 backdrop-blur-sm">
         <ChatInput onSendMessage={handleSendMessage} disabled={isProcessing} isProcessing={isProcessing} />
       </div>
     </div>
