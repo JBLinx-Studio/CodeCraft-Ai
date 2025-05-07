@@ -11,7 +11,6 @@ import PreviewPanel from "@/components/PreviewPanel";
 import { Template } from "@/types";
 import { useState, useEffect } from "react";
 import { smartFallbackGenerator } from "@/lib/template-generator";
-import CompanyBranding from "@/components/CompanyBranding";
 
 const Templates = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -89,11 +88,6 @@ const Templates = () => {
         <section className="bg-gradient-to-b from-white/50 to-slate-100/50 dark:from-slate-900/50 dark:to-slate-800/50 backdrop-blur-sm py-16">
           <div className="container px-4">
             <div className="max-w-4xl mx-auto">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <span className="text-xs px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                  JBLinx Studio
-                </span>
-              </div>
               <h1 className="font-heading text-4xl font-bold mb-6 text-center">
                 Professional <span className="bg-clip-text text-transparent bg-gradient-to-r from-theme-blue to-theme-green">Template Gallery</span>
               </h1>
@@ -235,15 +229,9 @@ const Templates = () => {
                       size="sm" 
                       variant="outline"
                       className="text-xs gap-1"
-                      onClick={() => {
-                        // Apply template to project
-                        if (templatePreview.html || templatePreview.css || templatePreview.js) {
-                          // Normally we would update app state here to apply the template
-                          toast.success("Template applied to project", {
-                            description: "You can now customize it in the editor"
-                          });
-                        }
-                      }}
+                      onClick={() => toast.success("Template applied to project", {
+                        description: "You can now customize it in the editor"
+                      })}
                     >
                       Use This Template
                       <ArrowRight className="h-3 w-3" />
@@ -259,10 +247,6 @@ const Templates = () => {
               </div>
             </div>
           </div>
-          
-          <div className="mt-12">
-            <CompanyBranding />
-          </div>
         </div>
       </main>
       
@@ -274,9 +258,6 @@ const Templates = () => {
                 <Code className="h-4 w-4" />
               </div>
               <span className="font-heading font-semibold">CodeCraft AI</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-                by JBLinx Studio
-              </span>
             </div>
             
             <div>
