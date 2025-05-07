@@ -29,7 +29,7 @@
     --theme-blue: #3b82f6;
     --theme-green: #10b981;
     
-    /* New robotic AI theme colors */
+    /* New improved robotic AI theme colors */
     --cyber-blue: #1EAEDB;
     --cyber-purple: #8B5CF6;
     --cyber-green: #10B981;
@@ -66,24 +66,55 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+  }
+
+  /* Improved scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400 dark:bg-slate-600;
   }
 }
 
 @layer components {
   .glassmorphism-card {
-    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm;
+    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm border border-slate-200 dark:border-slate-700/80 rounded-xl shadow-sm;
   }
   
   .glassmorphism-navbar {
-    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm;
+    @apply bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
   }
   
   .nav-link {
-    @apply px-3 py-2 text-sm rounded-md transition-colors hover:bg-slate-100 dark:hover:bg-slate-800;
+    @apply px-3 py-2 text-sm rounded-md transition-all duration-300 hover:bg-slate-100 dark:hover:bg-slate-800 relative overflow-hidden;
   }
   
   .nav-link-active {
     @apply bg-slate-100 dark:bg-slate-800 font-medium;
+  }
+  
+  .nav-link-active::after {
+    content: '';
+    @apply absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-theme-blue to-theme-green rounded-full;
+    animation: expandWidth 0.3s ease forwards;
+  }
+  
+  @keyframes expandWidth {
+    from { transform: scaleX(0.5); opacity: 0; }
+    to { transform: scaleX(1); opacity: 1; }
   }
   
   .shadow-glow {
@@ -98,13 +129,24 @@
   .bg-code-pattern {
     background-color: #0f172a;
     background-image: radial-gradient(#1e293b 1px, transparent 1px);
-    background-size: 16px 16px; /* More zoomed-in (was 20px) */
+    background-size: 16px 16px;
   }
 
   .dark .bg-code-pattern {
     background-color: #0f172a;
     background-image: radial-gradient(#1e293b 1px, transparent 1px);
-    background-size: 16px 16px; /* More zoomed-in (was 20px) */
+    background-size: 16px 16px;
+  }
+
+  /* More subtle background grid pattern */
+  .bg-subtle-grid {
+    background-color: transparent;
+    background-image: url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.25 0C0.559644 0 0 0.559644 0 1.25C0 1.94036 0.559644 2.5 1.25 2.5C1.94036 2.5 2.5 1.94036 2.5 1.25C2.5 0.559644 1.94036 0 1.25 0Z' fill='%23f1f5f9' fill-opacity='0.4'/%3E%3C/svg%3E");
+    background-size: 30px 30px;
+  }
+
+  .dark .bg-subtle-grid {
+    background-image: url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.25 0C0.559644 0 0 0.559644 0 1.25C0 1.94036 0.559644 2.5 1.25 2.5C1.94036 2.5 2.5 1.94036 2.5 1.25C2.5 0.559644 1.94036 0 1.25 0Z' fill='%23334155' fill-opacity='0.2'/%3E%3C/svg%3E");
   }
 
   .hover-card {
@@ -118,13 +160,16 @@
   /* Enhanced animations */
   .animate-fade-in {
     animation: fadeIn 0.8s ease-out forwards;
+    opacity: 0;
   }
 
   .animate-slide-up {
     animation: slideUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
   }
   
-  /* Data-flow animation */
+  /* Enhanced data-flow animation */
   .data-flow {
     position: relative;
     overflow: hidden;
@@ -139,6 +184,20 @@
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
     animation: dataFlow 2s infinite;
+  }
+  
+  /* New gradients and overlays */
+  .gradient-overlay {
+    position: relative;
+  }
+  
+  .gradient-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.05), rgba(16, 185, 129, 0.05));
+    pointer-events: none;
+    z-index: 1;
   }
   
   @keyframes dataFlow {
@@ -181,6 +240,37 @@
     height: 2px;
     background: linear-gradient(90deg, var(--cyber-blue), var(--cyber-purple));
     animation: pulseWidth 2s ease-in-out infinite;
+  }
+  
+  /* Enhanced button styles */
+  .btn-glow {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-glow::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      to bottom right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(45deg);
+    transition: all 0.3s ease;
+    opacity: 0;
+  }
+  
+  .btn-glow:hover::after {
+    opacity: 1;
+    transition: all 0.3s ease;
+    transform: rotate(45deg) translate(-20%, -20%);
   }
   
   @keyframes pulseWidth {
@@ -236,7 +326,12 @@
 
   /* Enhanced glassmorphism effect */
   .premium-panel {
-    @apply bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/80 dark:border-slate-700/80 shadow-lg;
+    @apply bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/80 dark:border-slate-700/80 shadow-lg 
+    transition-all duration-300;
+  }
+
+  .premium-panel:hover {
+    @apply bg-white/70 dark:bg-slate-900/70 shadow-xl;
   }
 
   /* New cyberpunk-inspired panel style */
@@ -245,6 +340,11 @@
     box-shadow: 0 5px 15px rgba(30, 174, 219, 0.2), inset 0 0 1px rgba(139, 92, 246, 0.5);
     position: relative;
     overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .cyber-panel:hover {
+    box-shadow: 0 8px 25px rgba(30, 174, 219, 0.3), inset 0 0 2px rgba(139, 92, 246, 0.6);
   }
   
   .cyber-panel::before {
@@ -343,5 +443,19 @@
   
   .cyber-icon-green {
     color: var(--cyber-green);
+  }
+  
+  /* Enhanced tooltip */
+  .tooltip {
+    @apply relative inline-block;
+  }
+
+  .tooltip .tooltip-text {
+    @apply invisible absolute z-50 w-max p-2 bg-slate-800 text-white text-xs rounded-md 
+    opacity-0 transition-opacity duration-300 bottom-full left-1/2 -translate-x-1/2 mb-2;
+  }
+
+  .tooltip:hover .tooltip-text {
+    @apply visible opacity-100;
   }
 }

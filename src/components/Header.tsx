@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Github, Code, Moon, Sun, Menu, ExternalLink } from "lucide-react";
-import { useContext } from "react";
+import { useState, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,15 +13,38 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
-import { ThemeContext } from "@/App";
 
 export default function Header() {
-  const { theme, setTheme } = useContext(ThemeContext);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const location = useLocation();
+  
+  // Get system preference and saved theme on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    
+    const initialTheme = (savedTheme === "dark" || (!savedTheme && prefersDark)) ? "dark" : "light";
+    setTheme(initialTheme);
+    
+    if (initialTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
   
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
+    
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    
+    localStorage.setItem("theme", newTheme);
+    
     toast(`${newTheme === "light" ? "Light" : "Dark"} mode activated`, {
       description: `Visual preference updated`,
       duration: 2000,
@@ -75,7 +98,10 @@ export default function Header() {
             onClick={toggleTheme}
             title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
           >
-            {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            {theme === "light" ? 
+              <Moon className="h-4 w-4 transition-transform duration-300 hover:rotate-12" /> : 
+              <Sun className="h-4 w-4 transition-transform duration-300 hover:rotate-45" />
+            }
           </Button>
           
           <Button variant="outline" size="sm" className="gap-2 hidden sm:flex hover:bg-primary/10 hover:border-primary/30 transition-all duration-300">
