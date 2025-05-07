@@ -1,267 +1,88 @@
 
-import { AIClient, AIClientOptions, AIRequestParams } from "./base-client";
-import { AIServiceResponse } from "@/types";
+import { BaseClient, AIClientResponse, AIRequestParams } from "./base-client";
+import { AIClientConfig } from "./ai-client-factory";
 
 export const PERPLEXITY_MODELS = {
-  SMALL: "llama-3.1-sonar-small-128k-online",
-  LARGE: "llama-3.1-sonar-large-128k-online",
-  HUGE: "llama-3.1-sonar-huge-128k-online"
+  SMALL: "llama-3-8b-instruct",
+  MEDIUM: "mixtral-8x7b-instruct",
+  LARGE: "sonar-medium-online"
 };
 
-export interface PerplexityClientOptions extends AIClientOptions {
-  model?: keyof typeof PERPLEXITY_MODELS | string;
-}
+export class PerplexityClient extends BaseClient {
+  protected model: string;
 
-interface PerplexityResponse {
-  id: string;
-  model: string;
-  choices: {
-    index: number;
-    message: {
-      role: string;
-      content: string;
-    };
-    finish_reason: string;
-  }[];
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  };
-}
-
-export class PerplexityClient extends AIClient {
-  private model: string;
-  
-  constructor(options: PerplexityClientOptions) {
-    super(options);
-    this.model = options.model 
-      ? (typeof options.model === 'string' && options.model in PERPLEXITY_MODELS 
-          ? PERPLEXITY_MODELS[options.model as keyof typeof PERPLEXITY_MODELS]
-          : options.model)
+  constructor(config: AIClientConfig) {
+    super({ apiKey: config.apiKey });
+    this.model = config.modelType && PERPLEXITY_MODELS[config.modelType as keyof typeof PERPLEXITY_MODELS] 
+      ? PERPLEXITY_MODELS[config.modelType as keyof typeof PERPLEXITY_MODELS]
       : PERPLEXITY_MODELS.SMALL;
   }
   
-  async generateResponse(params: AIRequestParams): Promise<AIServiceResponse> {
+  async generateResponse(params: AIRequestParams): Promise<AIClientResponse> {
     try {
-      const { prompt, chatHistory } = params;
+      const { prompt, chatHistory = [] } = params;
       
-      // Check if this is a simple conversation rather than a code request
-      if (this.isSimpleConversation(prompt)) {
-        return this.handleConversation(prompt, chatHistory);
-      }
+      const formattedChatHistory = chatHistory.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
       
-      const systemMessage = `${this.createEnhancedSystemPrompt()}
-
-When responding to the user's web development request, follow this structure:
-
-1. First, share your Thinking Process - analyze the request thoroughly, consider different approaches, and show your reasoning step by step.
-
-2. For code solutions, structure your response with clear code blocks:
-{
-  "html": "<!-- Complete HTML code with helpful comments -->",
-  "css": "/* Complete CSS code with organization and comments */",
-  "js": "// Complete JavaScript code with detailed comments",
-  "explanation": "Detailed explanation of your implementation approach, key decisions, and how components work together"
-}
-
-3. If the user is asking a question rather than requesting code, provide an educational and thorough explanation that helps them understand the concept deeply.
-
-Make your response conversational, educational, and practical - as if you're a helpful colleague working through the problem together.`;
-
-      const request = {
-        model: this.model,
-        messages: [
-          { role: "system", content: systemMessage },
-          ...chatHistory.slice(-10), // Include more context from previous messages
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.7, // Increased for more creative/diverse responses
-        top_p: 0.9,
-        max_tokens: 4000
-      };
-      
-      const response = await fetch("https://api.perplexity.ai/chat/completions", {
-        method: "POST",
+      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${this.apiKey}`
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`
         },
-        body: JSON.stringify(request)
+        body: JSON.stringify({
+          model: this.model,
+          messages: [
+            {
+              role: "system",
+              content: "You are a web development AI assistant that helps create HTML, CSS, and JavaScript code for web applications. When asked to build something, you should provide the complete HTML, CSS, and JavaScript code necessary to implement the requested feature or application. Separate your response into sections for HTML, CSS, and JavaScript. Make your designs responsive and visually appealing."
+            },
+            ...formattedChatHistory,
+            {
+              role: "user",
+              content: prompt
+            }
+          ]
+        })
       });
       
       if (!response.ok) {
         const errorText = await response.text();
-        return { 
-          success: false, 
-          error: `API responded with status ${response.status}: ${errorText}` 
-        };
-      }
-      
-      const data: PerplexityResponse = await response.json();
-      return this.parseResponse(data);
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : "Unknown error occurred" 
-      };
-    }
-  }
-  
-  private isSimpleConversation(prompt: string): boolean {
-    const simplifiedPrompt = prompt.toLowerCase().trim();
-    
-    // Check for greetings and simple questions
-    const conversationStarters = [
-      "hello", "hi", "hey", "greetings", "howdy", 
-      "what's up", "whats up", "sup", "yo", 
-      "good morning", "good afternoon", "good evening",
-      "help", "who are you", "what can you do", "how does this work"
-    ];
-    
-    // Check for exact matches or starts with
-    return conversationStarters.some(starter => 
-      simplifiedPrompt === starter || 
-      simplifiedPrompt.startsWith(`${starter} `) || 
-      simplifiedPrompt.startsWith(`${starter},`) ||
-      simplifiedPrompt.includes(starter)
-    );
-  }
-  
-  private handleConversation(prompt: string, history: Array<{role: string, content: string}>): AIServiceResponse {
-    const isFirstMessage = history.filter(msg => msg.role === "user").length === 0;
-    const simplifiedPrompt = prompt.toLowerCase().trim();
-    let response = "";
-    
-    // Handle different types of conversational prompts
-    if (simplifiedPrompt.includes("hello") || simplifiedPrompt.includes("hi") || 
-        simplifiedPrompt.includes("hey") || simplifiedPrompt.includes("greetings")) {
-      // Handle time-based greetings
-      if (simplifiedPrompt.includes("morning")) {
-        response = "Good morning! ";
-      } else if (simplifiedPrompt.includes("afternoon")) {
-        response = "Good afternoon! ";
-      } else if (simplifiedPrompt.includes("evening")) {
-        response = "Good evening! ";
-      } else {
-        response = "Hello! ";
-      }
-      
-      response += "I'm WebCraft AI, your web development assistant. ";
-    }
-    else if (simplifiedPrompt.includes("who are you") || simplifiedPrompt.includes("what are you")) {
-      response = "I'm WebCraft AI, a development assistant specialized in helping you build web applications. ";
-    }
-    else if (simplifiedPrompt.includes("what can you do") || 
-             simplifiedPrompt.includes("how") || simplifiedPrompt.includes("help")) {
-      response = "I can help you create web applications by writing code, explaining concepts, and suggesting solutions to development problems. ";
-    }
-    else {
-      // Generic conversation response
-      response = "I'm here to help with your web development needs. ";
-    }
-    
-    // Add more context based on conversation history
-    if (isFirstMessage) {
-      response += "I can help you build websites and web applications by generating HTML, CSS, and JavaScript code based on your descriptions. You can describe what you want to build, ask for specific features, or ask questions about web development concepts. What would you like to create today?";
-    } else {
-      // Reference previous conversation
-      response += "How else can I assist you with your web development project? Feel free to ask about specific features, request code examples, or ask about web development concepts.";
-    }
-    
-    return {
-      success: true,
-      data: {
-        code: {
-          html: "",
-          css: "",
-          js: ""
-        },
-        explanation: response
-      }
-    };
-  }
-  
-  private parseResponse(response: PerplexityResponse): AIServiceResponse {
-    try {
-      const content = response.choices[0]?.message?.content || "";
-      
-      // Extract thinking process
-      let thinkingProcess = "";
-      const thinkingMatch = content.match(/(?:Thinking Process:|Thinking:|Analysis:|I'll analyze this step by step:)([\s\S]*?)(?=\{|\`\`\`|HTML:|CSS:|JS:|<html>|$)/i);
-      if (thinkingMatch) {
-        thinkingProcess = thinkingMatch[1].trim();
-      }
-      
-      // First try to extract JSON
-      try {
-        // Find all JSON-like content in the response
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          return {
-            success: true,
-            data: {
-              code: {
-                html: parsed.html || "",
-                css: parsed.css || "",
-                js: parsed.js || ""
-              },
-              explanation: thinkingProcess 
-                ? `${thinkingProcess}\n\n${parsed.explanation || ""}` 
-                : (parsed.explanation || "")
-            }
-          };
-        }
-      } catch (e) {
-        console.log("JSON parsing failed, trying code blocks extraction");
-      }
-      
-      // Fall back to code block extraction
-      const htmlMatch = content.match(/```html([\s\S]*?)```/);
-      const cssMatch = content.match(/```css([\s\S]*?)```/);
-      const jsMatch = content.match(/```(?:js|javascript)([\s\S]*?)```/);
-      
-      // Extract explanation by removing code blocks
-      let explanation = content.replace(/```html[\s\S]*?```/g, "")
-                     .replace(/```css[\s\S]*?```/g, "")
-                     .replace(/```js[\s\S]*?```/g, "")
-                     .replace(/```javascript[\s\S]*?```/g, "")
-                     .replace(/Thinking Process:[\s\S]*?(?=HTML:|CSS:|JS:|<html>|$)/i, "")
-                     .replace(/Thinking:[\s\S]*?(?=HTML:|CSS:|JS:|<html>|$)/i, "")
-                     .replace(/Analysis:[\s\S]*?(?=HTML:|CSS:|JS:|<html>|$)/i, "")
-                     .trim();
-      
-      if (htmlMatch || cssMatch || jsMatch) {
         return {
-          success: true,
-          data: {
-            code: {
-              html: htmlMatch ? htmlMatch[1].trim() : "<div>Generated content</div>",
-              css: cssMatch ? cssMatch[1].trim() : "/* Generated styles */",
-              js: jsMatch ? jsMatch[1].trim() : "// Generated script"
-            },
-            explanation: thinkingProcess ? `${thinkingProcess}\n\n${explanation}` : explanation
-          }
+          success: false,
+          error: `API Error (${response.status}): ${errorText || response.statusText}`
         };
       }
       
-      // If no structured content found, use the entire content as explanation
+      const data = await response.json();
+      const assistantResponse = data.choices[0].message.content;
+      
+      // Parse the response to extract code blocks
+      const htmlMatch = assistantResponse.match(/```html\s*([\s\S]*?)\s*```/i);
+      const cssMatch = assistantResponse.match(/```css\s*([\s\S]*?)\s*```/i);
+      const jsMatch = assistantResponse.match(/```js(?:cript)?\s*([\s\S]*?)\s*```/i);
+      
+      // Clean up explanation by removing code blocks
+      let explanation = assistantResponse.replace(/```(?:html|css|js|javascript)[\s\S]*?```/gi, '').trim();
+      
       return {
         success: true,
         data: {
           code: {
-            html: "",
-            css: "",
-            js: ""
+            html: htmlMatch ? htmlMatch[1].trim() : "",
+            css: cssMatch ? cssMatch[1].trim() : "",
+            js: jsMatch ? jsMatch[1].trim() : ""
           },
-          explanation: content
+          explanation
         }
       };
     } catch (error) {
-      return { 
-        success: false, 
-        error: "Error parsing API response" 
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error occurred"
       };
     }
   }
