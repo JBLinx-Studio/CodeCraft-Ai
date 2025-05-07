@@ -1,7 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Github, Code, Moon, Sun, Menu, ExternalLink } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Github, Code, Menu, ExternalLink } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,48 +12,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
+import { useTheme } from "@/lib/themes/ThemeContext";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Header() {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { theme, setTheme } = useTheme();
   const location = useLocation();
   
-  // Get system preference and saved theme on mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    
-    const initialTheme = (savedTheme === "dark" || (!savedTheme && prefersDark)) ? "dark" : "light";
-    setTheme(initialTheme);
-    
-    if (initialTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, []);
-  
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    
-    localStorage.setItem("theme", newTheme);
-    
-    toast(`${newTheme === "light" ? "Light" : "Dark"} mode activated`, {
-      description: `Visual preference updated`,
-      duration: 2000,
-    });
-  };
-
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
-
   const handleUpgradeClick = () => {
     toast("Pro Upgrade", {
       description: "Redirecting to upgrade options",
@@ -63,6 +27,10 @@ export default function Header() {
         onClick: () => console.log("Viewing upgrade plans"),
       },
     });
+  };
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
   };
 
   return (
@@ -91,18 +59,7 @@ export default function Header() {
             <Link to="/documentation" className={`nav-link ${isActive('/documentation') ? 'nav-link-active' : ''}`}>Docs</Link>
           </nav>
           
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="rounded-full transition-all duration-300 hover:bg-primary/10"
-            onClick={toggleTheme}
-            title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-          >
-            {theme === "light" ? 
-              <Moon className="h-4 w-4 transition-transform duration-300 hover:rotate-12" /> : 
-              <Sun className="h-4 w-4 transition-transform duration-300 hover:rotate-45" />
-            }
-          </Button>
+          <ThemeToggle />
           
           <Button variant="outline" size="sm" className="gap-2 hidden sm:flex hover:bg-primary/10 hover:border-primary/30 transition-all duration-300">
             <Github className="w-4 h-4" />

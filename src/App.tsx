@@ -4,8 +4,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState, useEffect, createContext } from "react";
-import { getInitialTheme, applyTheme, Theme } from "@/lib/theme-utils";
+import { useState, useEffect } from "react";
+
+// Theme provider - import from the centralized theme exports
+import { ThemeProvider } from "./lib/themes";
 
 // Pages
 import Home from "./pages/Home";
@@ -14,42 +16,36 @@ import Templates from "./pages/Templates";
 import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
 
-// Create theme context
-type ThemeContextType = {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-};
-
-export const ThemeContext = createContext<ThemeContextType>({
-  theme: "light",
-  setTheme: () => {},
-});
-
+/**
+ * Main application component
+ */
 const App = () => {
-  // Create a client inside the component function
-  const [queryClient] = useState(() => new QueryClient());
-  const [theme, setTheme] = useState<Theme>("light");
-  
-  // Apply the saved theme when the app loads
+  // Create a query client for data fetching
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60 * 1000, // 1 minute
+        retry: 1,
+      },
+    }
+  }));
+
+  // Apply any initial app-wide effects
   useEffect(() => {
-    const initialTheme = getInitialTheme();
-    setTheme(initialTheme);
-    applyTheme(initialTheme);
+    // Apply smooth scrolling
+    document.documentElement.style.scrollBehavior = "smooth";
+    
+    return () => {
+      document.documentElement.style.scrollBehavior = "";
+    };
   }, []);
   
-  // Update theme function that also updates localStorage and document classes
-  const updateTheme = (newTheme: Theme) => {
-    setTheme(newTheme);
-    applyTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-  };
-  
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: updateTheme }}>
+    <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
-          <Sonner position="top-right" closeButton theme={theme} />
+          <Sonner position="top-right" closeButton theme="system" />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Home />} />
@@ -61,7 +57,7 @@ const App = () => {
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
-    </ThemeContext.Provider>
+    </ThemeProvider>
   );
 };
 
