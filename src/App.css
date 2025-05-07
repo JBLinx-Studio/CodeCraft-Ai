@@ -1,9 +1,4 @@
 
-/* Import modular CSS files */
-@import './styles/code-panel.css';
-@import './styles/panel-connections.css';
-@import './styles/mode-sections.css';
-
 /* Base styles for the app */
 #root {
   max-width: 1280px;
@@ -51,4 +46,152 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Enhanced code panel styling */
+.code-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.dark .code-panel {
+  background-color: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(30, 41, 59, 0.8);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* Code header styles */
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(to right, rgba(219, 234, 254, 0.9), rgba(191, 219, 254, 0.8));
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+  border-bottom: 1px solid rgba(203, 213, 225, 0.8);
+}
+
+.dark .code-header {
+  background: linear-gradient(to right, rgba(30, 58, 138, 0.8), rgba(56, 189, 248, 0.1));
+  border-bottom: 1px solid rgba(51, 65, 85, 0.8);
+}
+
+/* Enhanced backgrounds for light and dark mode */
+.bg-light-pattern {
+  background-color: #f8fafc;
+  background-image: radial-gradient(rgba(203, 213, 225, 0.5) 1px, transparent 1px), 
+                    radial-gradient(rgba(148, 163, 184, 0.2) 1px, transparent 1px);
+  background-position: 0 0, 25px 25px;
+  background-size: 50px 50px;
+  background-attachment: fixed;
+}
+
+.bg-dark-pattern {
+  background-color: #0f172a;
+  background-image: radial-gradient(rgba(51, 65, 85, 0.5) 1px, transparent 1px),
+                    radial-gradient(rgba(71, 85, 105, 0.3) 1px, transparent 1px);
+  background-position: 0 0, 25px 25px;
+  background-size: 50px 50px;
+  background-attachment: fixed;
+}
+
+/* Enhanced connected panels styling */
+.panel-connection {
+  position: relative;
+  overflow: visible;
+}
+
+.panel-connection::after {
+  content: '';
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(14, 165, 233, 0.6), rgba(139, 92, 246, 0.6));
+  animation: pulseOpacity 2s infinite ease-in-out;
+}
+
+.dark .panel-connection::after {
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.6), rgba(168, 85, 247, 0.6));
+}
+
+/* Panel connection variations */
+.panel-connection-horizontal::after {
+  top: 50%;
+  width: 20px;
+  transform: translateY(-50%);
+}
+
+.panel-connection-right::after {
+  right: -20px;
+}
+
+.panel-connection-left::after {
+  left: -20px;
+}
+
+/* Panel connection animation */
+@keyframes pulseOpacity {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+/* Light/dark mode specific sections */
+.light-section {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.9));
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.dark-section {
+  background: linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,41,59,0.9));
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced text styling for light/dark mode */
+.title-light {
+  color: #0f172a;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.title-dark {
+  color: #f8fafc;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.subtitle-light {
+  color: #334155;
+}
+
+.subtitle-dark {
+  color: #cbd5e1;
+}
+
+/* Enhanced hover effects */
+.hover-card-light {
+  transition: all 0.3s ease;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.hover-card-light:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: rgba(186, 230, 253, 0.8);
+}
+
+.hover-card-dark {
+  transition: all 0.3s ease;
+  border: 1px solid rgba(51, 65, 85, 0.8);
+}
+
+.hover-card-dark:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.15);
+  border-color: rgba(124, 58, 237, 0.6);
 }
