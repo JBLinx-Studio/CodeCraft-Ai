@@ -96,15 +96,15 @@
 
   /* More zoomed-in background pattern for a futuristic look */
   .bg-code-pattern {
-    background-color: #0f172a;
-    background-image: radial-gradient(#1e293b 1px, transparent 1px);
-    background-size: 20px 20px; /* Even more zoomed-in (was 25px) */
+    background-color: #f8fafc;
+    background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+    background-size: 25px 25px; /* Even more zoomed-in (was 40px) */
   }
 
   .dark .bg-code-pattern {
     background-color: #0f172a;
     background-image: radial-gradient(#1e293b 1px, transparent 1px);
-    background-size: 20px 20px; /* Even more zoomed-in (was 25px) */
+    background-size: 25px 25px; /* Even more zoomed-in (was 40px) */
   }
 
   .hover-card {
@@ -140,11 +140,6 @@
     background-position: 0 0, 0 100%;
     background-repeat: no-repeat;
     box-shadow: 0 0 5px rgba(30, 174, 219, 0.5);
-  }
-  
-  /* Text gradient */
-  .text-gradient-primary {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400;
   }
 
   @keyframes fadeIn {
@@ -200,7 +195,7 @@
 
   /* New cyberpunk-inspired panel style */
   .cyber-panel {
-    @apply bg-slate-900/90 backdrop-blur-xl border border-slate-700/50 shadow-lg rounded-xl;
+    @apply bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 shadow-lg rounded-xl;
     box-shadow: 0 5px 15px rgba(30, 174, 219, 0.2), inset 0 0 1px rgba(139, 92, 246, 0.5);
     position: relative;
     overflow: hidden;
@@ -232,7 +227,7 @@
   
   /* New cyberpunk-inspired card style */
   .cyber-card {
-    @apply bg-slate-800/40 backdrop-blur-md border border-slate-700/30 rounded-xl transition-all duration-300;
+    @apply bg-white/5 dark:bg-slate-800/20 backdrop-blur-md border border-slate-300/20 dark:border-slate-700/30 rounded-xl transition-all duration-300;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), inset 0 0 1px rgba(255, 255, 255, 0.2);
     position: relative;
   }
