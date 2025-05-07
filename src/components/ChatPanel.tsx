@@ -1,61 +1,7 @@
 
-import { useState, useEffect } from "react";
-import { nanoid } from "nanoid";
-import ChatMessage from "./ChatMessage";
-import ChatInput from "./ChatInput";
-import { Message } from "@/types";
-import AISettings from "./AISettings";
-import { Settings } from "lucide-react";
-import { Button } from "./ui/button";
-import { useAI } from "@/hooks/use-ai";
-import { toast } from "sonner";
-import { ScrollArea } from "./ui/scroll-area";
-import { extractCodeBlocks } from "@/lib/utils";
+// Only the handleSendMessage function (the rest is handled in the earlier write)
 
-export interface ChatPanelProps {
-  onCodeGenerated: (html: string, css: string, js: string) => void;
-}
-
-export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [showSettings, setShowSettings] = useState(false);
-  const { 
-    isProcessing,
-    generateCode,
-    apiKey,
-    usingFreeAPI,
-    saveApiKey,
-    setFreeAPI
-  } = useAI();
-  const [hasAuthError, setHasAuthError] = useState(false);
-
-  useEffect(() => {
-    // Add welcome message
-    if (messages.length === 0) {
-      setMessages([
-        {
-          id: nanoid(),
-          role: "assistant",
-          content: "Hello! I'm your AI assistant. Describe the web app you'd like me to build for you.",
-          timestamp: Date.now(),
-        },
-      ]);
-    }
-  }, [messages.length]);
-
-  const addMessage = (role: "user" | "assistant", content: string) => {
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: nanoid(),
-        role,
-        content,
-        timestamp: Date.now(),
-      },
-    ]);
-  };
-
-  const handleSendMessage = async (content: string) => {
+const handleSendMessage = async (content: string) => {
     addMessage("user", content);
     
     if (isProcessing) {
@@ -109,8 +55,10 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
         }
         
         addMessage("assistant", `I encountered an error: ${response.error}. Please try again with a different request.`);
-        toast.error("Error", {
+        uiToast({
+          title: "Error",
           description: response.error,
+          variant: "destructive",
         });
         return;
       }
@@ -159,56 +107,3 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
       }
     }
   };
-
-  const handleApiKeyChange = (key: string | null, useFreeApi: boolean) => {
-    if (useFreeApi) {
-      setFreeAPI();
-    } else if (key) {
-      saveApiKey(key, useFreeApi ? "FREE" : "PERPLEXITY");
-    }
-    setHasAuthError(false);
-  };
-
-  return (
-    <div className="flex flex-col h-full">
-      <div className="flex justify-between items-center p-3 border-b bg-secondary/20">
-        <h2 className="font-medium text-sm">AI Assistant</h2>
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => setShowSettings(!showSettings)}
-          title="AI Settings"
-        >
-          <Settings className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {showSettings && (
-        <AISettings 
-          onClose={() => setShowSettings(false)}
-          apiKey={apiKey}
-          usingFreeAPI={usingFreeAPI}
-          onApiKeyChange={handleApiKeyChange}
-        />
-      )}
-
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4 mb-4">
-          {messages.map((message) => (
-            <ChatMessage key={message.id} message={message} />
-          ))}
-        </div>
-      </ScrollArea>
-
-      <div className="p-2 border-t bg-background/50 backdrop-blur-sm">
-        <ChatInput 
-          onSendMessage={handleSendMessage} 
-          disabled={isProcessing}
-          isProcessing={isProcessing}
-        />
-      </div>
-    </div>
-  );
-};
-
-export default ChatPanel;
