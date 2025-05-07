@@ -1,5 +1,5 @@
 
-export interface ExtractedCode {
+interface ExtractedCode {
   html: string;
   css: string;
   js: string;
