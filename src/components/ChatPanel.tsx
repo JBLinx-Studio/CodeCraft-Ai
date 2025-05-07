@@ -17,7 +17,7 @@ export interface ChatPanelProps {
 }
 
 export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
-  const { generateCode, isProcessing, apiKey, usingFreeAPI, saveApiKey } = useAI();
+  const { generateCode, isProcessing, apiKey, usingFreeAPI, saveApiKey, clearApiKey, setFreeAPI } = useAI();
   const [messages, setMessages] = useState<Message[]>([]);
   const [showSettings, setShowSettings] = useState(false);
   const [hasAuthError, setHasAuthError] = useState(false);
@@ -153,8 +153,16 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
     }
   };
 
-  const handleApiKeyChange = (key: string | null, useFreeApi: boolean) => {
-    saveApiKey(key || "", useFreeApi ? "FREE" : "PERPLEXITY", "SMALL");
+  // Pass apiKey and usingFreeAPI to AISettings
+  // Use a single handleApiSettingsChange function that will call the appropriate functions
+  const handleApiSettingsChange = (key: string | null, useFreeApi: boolean) => {
+    if (useFreeApi) {
+      setFreeAPI();
+    } else if (key) {
+      saveApiKey(key, "PERPLEXITY", "SMALL");
+    } else {
+      clearApiKey();
+    }
     setHasAuthError(false);
   };
 
@@ -175,9 +183,9 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
       {showSettings && (
         <AISettings 
           onClose={() => setShowSettings(false)}
-          apiKey={apiKey}
+          apiKey={apiKey || ""}
           usingFreeAPI={usingFreeAPI}
-          onApiKeyChange={handleApiKeyChange}
+          onSave={handleApiSettingsChange}
         />
       )}
 
