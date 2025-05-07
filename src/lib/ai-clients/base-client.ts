@@ -1,9 +1,6 @@
-// This is a placeholder implementation based on what I see in the code
-// Note: Since I can't view the actual content, I'm creating a minimal implementation
-// to fix the errors mentioned in the error list
 
 export interface AIServiceResponse {
-  text: string;
+  text?: string;
   success?: boolean;
   error?: string;
   data?: {
@@ -24,37 +21,37 @@ export interface AIRequestParams {
   }>;
 }
 
-export interface AIClientResponse {
-  success: boolean;
-  text: string;
-  data?: any;
-  error?: string;
+export interface AIClientOptions {
+  apiKey: string | null;
+  model?: string;
 }
 
 export interface AIClient {
-  generateCode(prompt: string, apiKey?: string | null): Promise<AIServiceResponse>;
-  createEnhancedPrompt(prompt: string): string;
+  generateResponse(params: AIRequestParams): Promise<AIServiceResponse>;
+  createEnhancedPrompt(prompt: string, chatHistory?: Array<{ role: string; content: string }>): string;
 }
 
 export abstract class BaseClient implements AIClient {
   protected apiKey: string | null = null;
   
-  constructor(apiKey: string | null = null) {
-    this.apiKey = apiKey;
+  constructor(options: AIClientOptions) {
+    this.apiKey = options.apiKey;
   }
   
-  abstract generateCode(prompt: string, apiKey?: string | null): Promise<AIServiceResponse>;
+  abstract generateResponse(params: AIRequestParams): Promise<AIServiceResponse>;
   
-  createEnhancedPrompt(prompt: string): string {
+  createEnhancedPrompt(prompt: string, chatHistory?: Array<{ role: string; content: string }>): string {
     return `Generate a web application based on this description: ${prompt}`;
   }
   
-  protected enhancePromptWithContext(prompt: string): string {
+  protected enhancePromptWithContext(prompt: string, additionalInfo?: any[]): string {
     return this.createEnhancedPrompt(prompt);
   }
   
-  protected createEnhancedSystemPrompt(prompt: string): string {
-    return this.createEnhancedPrompt(prompt);
+  protected createEnhancedSystemPrompt(): string {
+    return `You are a helpful AI assistant that specializes in web development. 
+    Your task is to generate high-quality, functional HTML, CSS, and JavaScript code based on user requests.
+    Provide well-commented, clean code that follows best practices.`;
   }
   
   protected formatChatHistory(history: Array<{ role: string; content: string }>): string {
@@ -64,3 +61,6 @@ export abstract class BaseClient implements AIClient {
 
 // Add the free API key constant
 export const FREE_API_KEY = "demo-key-for-free-tier";
+
+// Re-export types to ensure they're available
+export type { AIClient, AIClientOptions, AIRequestParams, AIServiceResponse };
