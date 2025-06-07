@@ -4,6 +4,7 @@ import { OpenAIClient, OpenAIClientOptions } from "./openai-client";
 import { HuggingFaceClient, HuggingFaceClientOptions } from "./huggingface-client";
 import { PerplexityClient, PERPLEXITY_MODELS, PerplexityClientOptions } from "./perplexity-client";
 import { FreeAPIClient, FreeClientOptions } from "./free-client";
+import { PuterClient, PuterClientOptions } from "./puter-client";
 import { AIProvider } from "@/types";
 
 export interface AIClientFactoryOptions {
@@ -16,22 +17,12 @@ export class AIClientFactory {
   static createClient(options: AIClientFactoryOptions): AIClient {
     const { apiKey, provider, modelType } = options;
     
-    // If using free API, automatically switch to the FreeAPIClient
-    if (provider === "FREE" || apiKey === FREE_API_KEY) {
-      console.log("Using free API mode with default model");
-      return new FreeAPIClient({ 
+    // If using free API or no API key, use Puter.js as the primary free option
+    if (provider === "FREE" || apiKey === FREE_API_KEY || !apiKey || apiKey.trim() === '') {
+      console.log("Using Puter.js AI (free GPT-4o mini)");
+      return new PuterClient({ 
         apiKey: FREE_API_KEY,
-        // Using a model that doesn't require auth
-        model: "google/flan-t5-small" 
-      });
-    }
-    
-    // Check for empty or invalid API keys
-    if (!apiKey || apiKey.trim() === '') {
-      console.warn("No API key provided, falling back to free API");
-      return new FreeAPIClient({ 
-        apiKey: FREE_API_KEY,
-        model: "google/flan-t5-small" 
+        model: "gpt-4o-mini" 
       });
     }
     
@@ -51,23 +42,25 @@ export class AIClientFactory {
           });
         case "PERPLEXITY":
           console.log(`Creating Perplexity client with model type: ${modelType || 'SMALL'}`);
-          return new PerplexityClient({ 
+          return new Perplexity
+
+({ 
             apiKey, 
             model: modelType as keyof typeof PERPLEXITY_MODELS || "SMALL" 
           });
         default:
-          console.warn(`Unsupported AI provider: ${provider}, falling back to free API`);
-          return new FreeAPIClient({ 
+          console.warn(`Unsupported AI provider: ${provider}, falling back to Puter.js AI`);
+          return new PuterClient({ 
             apiKey: FREE_API_KEY, 
-            model: "google/flan-t5-small" 
+            model: "gpt-4o-mini" 
           });
       }
     } catch (error) {
       console.error("Error creating AI client:", error);
-      console.log("Falling back to free API due to client creation error");
-      return new FreeAPIClient({ 
+      console.log("Falling back to Puter.js AI due to client creation error");
+      return new PuterClient({ 
         apiKey: FREE_API_KEY,
-        model: "google/flan-t5-small" 
+        model: "gpt-4o-mini" 
       });
     }
   }
