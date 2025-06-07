@@ -16,8 +16,37 @@ export default function ChatMessage({ message }: ChatMessageProps) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
 
+  // Ensure we always have a string for the content
+  const getMessageContent = (content: any): string => {
+    if (typeof content === 'string') {
+      return content;
+    }
+    
+    // If it's an object, try to extract the message
+    if (content && typeof content === 'object') {
+      // Handle Puter.js response format
+      if (content.message) {
+        return typeof content.message === 'string' ? content.message : JSON.stringify(content.message);
+      }
+      // Handle other object formats
+      if (content.text) {
+        return content.text;
+      }
+      if (content.content) {
+        return content.content;
+      }
+      // Fallback to stringify
+      return JSON.stringify(content);
+    }
+    
+    // Fallback for any other type
+    return String(content);
+  };
+
+  const messageContent = getMessageContent(message.content);
+
   const copyText = () => {
-    navigator.clipboard.writeText(message.content);
+    navigator.clipboard.writeText(messageContent);
     setCopied(true);
     toast({
       title: "Copied to clipboard",
@@ -87,7 +116,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             </span>
           </div>
         </div>
-        <div className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</div>
+        <div className="text-sm whitespace-pre-wrap leading-relaxed">{messageContent}</div>
       </div>
     </div>
   );
