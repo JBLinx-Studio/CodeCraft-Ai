@@ -4,16 +4,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Play } from "lucide-react";
+import { Search, Play, Loader2 } from "lucide-react";
 import { Template } from "@/types";
 
 interface TemplateGalleryProps {
-  onTemplateSelect: (template: Template) => void;
+  onTemplateSelect?: (template: Template) => void;
+  onSelectTemplate?: (template: Template) => void | Promise<void>;
+  searchQuery?: string;
+  selectedTemplateId?: string;
+  isLoading?: boolean;
+  categoryFilter?: string;
 }
 
-export default function TemplateGallery({ onTemplateSelect }: TemplateGalleryProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+export default function TemplateGallery({ 
+  onTemplateSelect, 
+  onSelectTemplate,
+  searchQuery: externalSearchQuery = "",
+  selectedTemplateId,
+  isLoading = false,
+  categoryFilter
+}: TemplateGalleryProps) {
+  const [searchTerm, setSearchTerm] = useState(externalSearchQuery);
+  const [selectedCategory, setSelectedCategory] = useState(categoryFilter || "all");
+
+  // Use external search query if provided
+  const currentSearchTerm = externalSearchQuery || searchTerm;
 
   const templates: Template[] = [
     {
@@ -93,42 +108,61 @@ export default function TemplateGallery({ onTemplateSelect }: TemplateGalleryPro
   const categories = ["all", ...Array.from(new Set(templates.map(t => t.category)))];
 
   const filteredTemplates = templates.filter(template => {
-    const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         template.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         template.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesSearch = template.name.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
+                         template.description.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
+                         template.tags?.some(tag => tag.toLowerCase().includes(currentSearchTerm.toLowerCase()));
     const matchesCategory = selectedCategory === "all" || template.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesCategoryFilter = !categoryFilter || template.category === categoryFilter || 
+                                 template.tags?.includes(categoryFilter);
+    return matchesSearch && matchesCategory && matchesCategoryFilter;
   });
+
+  const handleTemplateSelect = (template: Template) => {
+    // Call whichever callback is provided
+    if (onTemplateSelect) {
+      onTemplateSelect(template);
+    }
+    if (onSelectTemplate) {
+      onSelectTemplate(template);
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Search templates..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
+      {!externalSearchQuery && (
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Search templates..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex gap-2 overflow-x-auto">
+            {categories.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                onClick={() => setSelectedCategory(category)}
+                className="whitespace-nowrap"
+              >
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </Button>
+            ))}
+          </div>
         </div>
-        <div className="flex gap-2 overflow-x-auto">
-          {categories.map((category) => (
-            <Button
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              onClick={() => setSelectedCategory(category)}
-              className="whitespace-nowrap"
-            >
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </Button>
-          ))}
-        </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTemplates.map((template) => (
-          <Card key={template.id} className="group hover:shadow-lg transition-shadow">
+          <Card 
+            key={template.id} 
+            className={`group hover:shadow-lg transition-shadow ${
+              selectedTemplateId === template.id ? 'ring-2 ring-primary' : ''
+            }`}
+          >
             <CardHeader className="pb-3">
               <div className="aspect-video bg-muted rounded-md mb-3 overflow-hidden">
                 <img
@@ -152,12 +186,22 @@ export default function TemplateGallery({ onTemplateSelect }: TemplateGalleryPro
                 ))}
               </div>
               <Button
-                onClick={() => onTemplateSelect(template)}
+                onClick={() => handleTemplateSelect(template)}
                 className="w-full"
                 size="sm"
+                disabled={isLoading && selectedTemplateId === template.id}
               >
-                <Play className="h-4 w-4 mr-2" />
-                Use Template
+                {isLoading && selectedTemplateId === template.id ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4 mr-2" />
+                    Use Template
+                  </>
+                )}
               </Button>
             </CardContent>
           </Card>
