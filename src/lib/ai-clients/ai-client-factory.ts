@@ -42,9 +42,7 @@ export class AIClientFactory {
           });
         case "PERPLEXITY":
           console.log(`Creating Perplexity client with model type: ${modelType || 'SMALL'}`);
-          return new Perplexity
-
-({ 
+          return new PerplexityClient({ 
             apiKey, 
             model: modelType as keyof typeof PERPLEXITY_MODELS || "SMALL" 
           });

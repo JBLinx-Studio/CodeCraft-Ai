@@ -1,3 +1,4 @@
+
 export interface Message {
   id: string;
   role: "user" | "assistant";
@@ -25,4 +26,7 @@ export interface Template {
   html: string;
   css: string;
   js: string;
+  thumbnail?: string;
+  category?: string;
+  tags?: string[];
 }

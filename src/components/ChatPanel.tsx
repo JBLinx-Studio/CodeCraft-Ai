@@ -5,7 +5,7 @@ import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import { Message, AIProvider } from "@/types";
 import AISettings from "./AISettings";
-import { Settings, Zap, LinkIcon, ChevronsRight, ChevronsLeft, SquareTerminal } from "lucide-react";
+import { Settings, Zap, Brain, Code, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAI } from "@/hooks/use-ai";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
   const [showSettings, setShowSettings] = useState(false);
   const [hasAuthError, setHasAuthError] = useState(false);
   const [aiThinkingSteps, setAiThinkingSteps] = useState<string[]>([]);
+  const [currentThinkingStep, setCurrentThinkingStep] = useState<string>('');
 
   useEffect(() => {
     // Add welcome message
@@ -31,7 +32,7 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
         {
           id: nanoid(),
           role: "assistant",
-          content: `Hello! I'm your AI assistant powered by ${usingFreeAPI ? 'Puter.js (Free GPT-4o mini)' : apiProvider}. I can build complete web applications for you. What would you like to create?`,
+          content: `Hello! I'm your professional AI assistant powered by ${usingFreeAPI ? 'Puter.js (Free GPT-4o mini)' : apiProvider}. I can build complete, production-ready web applications just like Lovable AI. What would you like to create today?`,
           timestamp: Date.now(),
         },
       ]);
@@ -50,26 +51,36 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
     ]);
   };
 
-  const simulateAIThinking = () => {
+  const simulateLovableAIThinking = () => {
     const thinkingSteps = [
-      "🤔 Analyzing your request...",
-      "📋 Planning the application structure...",
-      "🎨 Designing the user interface...",
-      "⚡ Generating HTML structure...",
-      "🎭 Creating CSS styles...",
-      "🚀 Writing JavaScript functionality...",
-      "✨ Optimizing and finalizing code...",
-      "🔍 Testing and validating...",
-      "✅ Ready to deploy!"
+      "🧠 Analyzing your requirements...",
+      "📋 Planning application architecture...",
+      "🎨 Designing user interface layout...",
+      "🏗️ Setting up HTML structure...",
+      "💫 Creating responsive CSS styles...",
+      "⚡ Writing interactive JavaScript...",
+      "🔧 Optimizing for performance...",
+      "📱 Ensuring mobile responsiveness...",
+      "✨ Adding professional animations...",
+      "🚀 Finalizing production code...",
+      "✅ Application ready for deployment!"
     ];
 
     setAiThinkingSteps([]);
+    setCurrentThinkingStep('');
     
     thinkingSteps.forEach((step, index) => {
       setTimeout(() => {
+        setCurrentThinkingStep(step);
         setAiThinkingSteps(prev => [...prev, step]);
-      }, index * 800);
+      }, index * 600);
     });
+
+    // Clear thinking steps after completion
+    setTimeout(() => {
+      setCurrentThinkingStep('');
+      setAiThinkingSteps([]);
+    }, thinkingSteps.length * 600 + 2000);
   };
 
   const handleSendMessage = async (content: string) => {
@@ -79,28 +90,30 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
       return;
     }
     
-    // Start AI thinking simulation
+    // Start Lovable-style AI thinking simulation
     setAiThinkingSteps([]);
-    simulateAIThinking();
+    simulateLovableAIThinking();
     
     // Add a thinking message
     const thinkingId = nanoid();
     setMessages((prev) => [...prev, {
       id: thinkingId,
       role: "assistant",
-      content: "🤖 AI is building your application...",
+      content: "🤖 AI Engineer is building your professional web application...",
       timestamp: Date.now(),
     }]);
     
     try {
+      console.log('🚀 Starting professional code generation...');
       const response = await generateCode(content);
       
       // Remove the thinking message
       setMessages(prev => prev.filter(msg => msg.id !== thinkingId));
       setAiThinkingSteps([]);
+      setCurrentThinkingStep('');
       
       if (response.error) {
-        addMessage("assistant", `I encountered an issue: ${response.error}. But I've created something for you using my built-in capabilities!`);
+        addMessage("assistant", `I encountered an issue: ${response.error}. But I've created a professional application for you using my advanced capabilities!`);
       }
       
       const { html = "", css = "", js = "" } = response.code || {};
@@ -108,40 +121,41 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
       // Update the preview if code was generated
       if (html || css || js) {
         onCodeGenerated(html, css, js);
+        console.log('✅ Code generated and preview updated');
       }
       
       // Add the AI's response message
-      let responseMessage = response.explanation || "I've created your web application! Check the preview panel to see it in action.";
+      let responseMessage = response.explanation || "I've created your professional web application! Check the preview panel to see your modern, responsive application in action.";
       
       if (usingFreeAPI) {
-        responseMessage += "\n\n💡 Built with free Puter.js AI - no API keys required!";
+        responseMessage += "\n\n💡 Built with free Puter.js AI - professional results without API costs!";
       }
       
       addMessage("assistant", responseMessage);
       
       // Success notification
       if (html || css || js) {
-        toast.success("Application Generated! 🎉", {
-          description: "Your web app is ready in the preview panel",
+        toast.success("Professional Application Generated! 🎉", {
+          description: "Your enterprise-grade web app is ready in the preview panel",
           duration: 4000,
         });
       }
     } catch (error) {
-      console.error("Error generating code:", error);
+      console.error("❌ Error generating code:", error);
       
       // Remove the thinking message
       setMessages(prev => prev.filter(msg => msg.id !== thinkingId));
       setAiThinkingSteps([]);
+      setCurrentThinkingStep('');
       
-      addMessage("assistant", "I encountered an issue, but I've generated something for you using my built-in templates. You can refine it by describing what you'd like to change!");
+      addMessage("assistant", "I encountered an issue, but I've generated a professional application for you using my built-in capabilities. You can refine it by describing what you'd like to change!");
       
       toast.error("Generation Error", {
-        description: "Used fallback mode to create your app",
+        description: "Used fallback mode to create your professional app",
       });
     }
   };
 
-  // Fix the handler to match AISettings props signature
   const handleApiSettingsChange = (key: string, provider: AIProvider, modelType?: string) => {
     if (provider === "FREE") {
       setFreeAPI();
@@ -162,12 +176,12 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
       <div className="flex justify-between items-center p-3 border-b bg-gradient-to-r from-slate-800/90 to-slate-900/90">
         <div className="flex items-center gap-2">
           <div className="h-6 w-6 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 flex items-center justify-center shadow-glow-sm pulse cyber-pulse">
-            <Zap className="h-3.5 w-3.5 text-white" />
+            <Brain className="h-3.5 w-3.5 text-white" />
           </div>
           <div className="flex flex-col">
-            <h2 className="font-medium text-sm bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400">AI Assistant</h2>
+            <h2 className="font-medium text-sm bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400">AI Engineer</h2>
             <span className="text-xs text-cyan-300/70">
-              {usingFreeAPI ? "Powered by Puter.js (Free)" : `${apiProvider} API`}
+              {usingFreeAPI ? "Powered by Puter.js (Free GPT-4o)" : `${apiProvider} API`}
             </span>
           </div>
         </div>
@@ -204,19 +218,37 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
             <ChatMessage key={message.id} message={message} />
           ))}
           
-          {/* AI Thinking Steps Display */}
-          {isProcessing && aiThinkingSteps.length > 0 && (
+          {/* Lovable-style AI Thinking Steps Display */}
+          {isProcessing && (aiThinkingSteps.length > 0 || currentThinkingStep) && (
             <div className="bg-slate-800/50 border border-cyan-500/30 rounded-lg p-4 backdrop-blur-sm">
               <div className="flex items-center gap-2 mb-3">
                 <div className="h-4 w-4 rounded-full bg-gradient-to-r from-cyan-400 to-purple-400 animate-pulse"></div>
-                <span className="text-sm text-cyan-300 font-medium">AI Building Process</span>
+                <span className="text-sm text-cyan-300 font-medium">AI Engineer Building Process</span>
+                <Sparkles className="h-3 w-3 text-yellow-400 animate-pulse" />
               </div>
-              <div className="space-y-2">
-                {aiThinkingSteps.map((step, index) => (
-                  <div key={index} className="flex items-center gap-2 text-sm text-slate-300">
-                    <span className="animate-pulse">{step}</span>
+              
+              {/* Current thinking step with emphasis */}
+              {currentThinkingStep && (
+                <div className="mb-2 p-2 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded border border-cyan-400/20">
+                  <div className="flex items-center gap-2 text-sm text-cyan-200 font-medium">
+                    <Code className="h-3 w-3 animate-spin" />
+                    <span>{currentThinkingStep}</span>
+                  </div>
+                </div>
+              )}
+              
+              {/* Completed steps */}
+              <div className="space-y-1 max-h-32 overflow-y-auto">
+                {aiThinkingSteps.slice(0, -1).map((step, index) => (
+                  <div key={index} className="flex items-center gap-2 text-xs text-slate-300 opacity-70">
+                    <div className="h-1 w-1 rounded-full bg-green-400"></div>
+                    <span>{step}</span>
                   </div>
                 ))}
+              </div>
+              
+              <div className="mt-3 text-xs text-slate-400 italic">
+                Professional code generation in progress...
               </div>
             </div>
           )}

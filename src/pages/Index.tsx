@@ -102,8 +102,12 @@ const Index = () => {
               html={html} 
               css={css} 
               js={js} 
-              extraControls={html || css || js ? <GitHubIntegration html={html} css={css} js={js} /> : undefined}
             />
+            {(html || css || js) && (
+              <div className="p-3 border-t bg-white/50 dark:bg-black/20">
+                <GitHubIntegration html={html} css={css} js={js} />
+              </div>
+            )}
           </div>
         </div>
         
@@ -143,7 +147,6 @@ const Index = () => {
               </div>
             </div>
             
-            {/* How It Works */}
             <div className="mt-24 mb-12">
               <div className="text-center mb-12">
                 <h2 className="text-2xl font-heading font-semibold mb-2">
@@ -153,7 +156,6 @@ const Index = () => {
               </div>
               
               <div className="flex flex-col md:flex-row justify-between max-w-4xl mx-auto relative">
-                {/* Connection line */}
                 <div className="absolute top-16 left-0 right-0 h-0.5 bg-gradient-to-r from-neutral-200 to-neutral-300 hidden md:block"></div>
                 
                 <div className="flex-1 flex flex-col items-center text-center p-6 relative z-10 animate-fade-in">
