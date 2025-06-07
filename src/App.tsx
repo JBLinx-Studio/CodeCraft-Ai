@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 // Pages
-import Home from "./pages/Home";
+import Index from "./pages/Index"; // Changed from Home to Index
 import Features from "./pages/Features";
 import Templates from "./pages/Templates";
 import Documentation from "./pages/Documentation";
@@ -31,7 +30,6 @@ const App = () => {
   const [queryClient] = useState(() => new QueryClient());
   const [theme, setTheme] = useState<"light" | "dark">("light");
   
-  // Apply the saved theme when the app loads
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -46,7 +44,6 @@ const App = () => {
     }
   }, []);
   
-  // Update theme function that also updates localStorage and document classes
   const updateTheme = (newTheme: "light" | "dark") => {
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
@@ -66,7 +63,7 @@ const App = () => {
           <Sonner position="top-right" closeButton theme="system" />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<Index />} />
               <Route path="/features" element={<Features />} />
               <Route path="/templates" element={<Templates />} />
               <Route path="/documentation" element={<Documentation />} />
