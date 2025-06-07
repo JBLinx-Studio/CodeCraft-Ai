@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { nanoid } from "nanoid";
 import ChatMessage from "./ChatMessage";
@@ -32,7 +31,7 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
         {
           id: nanoid(),
           role: "assistant",
-          content: `Hello! I'm your professional AI assistant powered by ${usingFreeAPI ? 'Puter.js (Free GPT-4o mini)' : apiProvider}. I can build complete, production-ready web applications just like Lovable AI. What would you like to create today?`,
+          content: `Hello! I'm your AI assistant powered by ${usingFreeAPI ? 'Puter.js (Free GPT-4o mini)' : apiProvider}. I can chat with you, answer questions, and build complete web applications when you ask. What would you like to do today?`,
           timestamp: Date.now(),
         },
       ]);
@@ -51,8 +50,15 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
     ]);
   };
 
-  const simulateLovableAIThinking = () => {
-    const thinkingSteps = [
+  const simulateLovableAIThinking = (isCodeGeneration: boolean) => {
+    const chatThinkingSteps = [
+      "🤔 Processing your question...",
+      "🧠 Analyzing context...",
+      "💭 Formulating response...",
+      "✅ Response ready!"
+    ];
+
+    const codeThinkingSteps = [
       "🧠 Analyzing your requirements...",
       "📋 Planning application architecture...",
       "🎨 Designing user interface layout...",
@@ -66,21 +72,36 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
       "✅ Application ready for deployment!"
     ];
 
+    const steps = isCodeGeneration ? codeThinkingSteps : chatThinkingSteps;
+    
     setAiThinkingSteps([]);
     setCurrentThinkingStep('');
     
-    thinkingSteps.forEach((step, index) => {
+    steps.forEach((step, index) => {
       setTimeout(() => {
         setCurrentThinkingStep(step);
         setAiThinkingSteps(prev => [...prev, step]);
-      }, index * 600);
+      }, index * (isCodeGeneration ? 600 : 400));
     });
 
     // Clear thinking steps after completion
     setTimeout(() => {
       setCurrentThinkingStep('');
       setAiThinkingSteps([]);
-    }, thinkingSteps.length * 600 + 2000);
+    }, steps.length * (isCodeGeneration ? 600 : 400) + 2000);
+  };
+
+  const isCodeGenerationRequest = (prompt: string): boolean => {
+    const codeKeywords = [
+      'create', 'build', 'make', 'generate', 'develop', 'design', 'website', 'app', 'application',
+      'page', 'component', 'form', 'button', 'landing', 'dashboard', 'portfolio', 'blog',
+      'ecommerce', 'todo', 'calculator', 'game', 'quiz', 'gallery', 'slider', 'navbar',
+      'footer', 'header', 'sidebar', 'modal', 'popup', 'dropdown', 'menu', 'chart',
+      'table', 'list', 'card', 'banner', 'hero', 'section', 'layout', 'responsive'
+    ];
+
+    const lowerPrompt = prompt.toLowerCase();
+    return codeKeywords.some(keyword => lowerPrompt.includes(keyword));
   };
 
   const handleSendMessage = async (content: string) => {
@@ -90,21 +111,27 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
       return;
     }
     
-    // Start Lovable-style AI thinking simulation
+    const isCodeRequest = isCodeGenerationRequest(content);
+    
+    // Start appropriate thinking simulation
     setAiThinkingSteps([]);
-    simulateLovableAIThinking();
+    simulateLovableAIThinking(isCodeRequest);
     
     // Add a thinking message
     const thinkingId = nanoid();
+    const thinkingMessage = isCodeRequest 
+      ? "🤖 AI Engineer is building your professional web application..."
+      : "🤖 AI is thinking about your question...";
+      
     setMessages((prev) => [...prev, {
       id: thinkingId,
       role: "assistant",
-      content: "🤖 AI Engineer is building your professional web application...",
+      content: thinkingMessage,
       timestamp: Date.now(),
     }]);
     
     try {
-      console.log('🚀 Starting professional code generation...');
+      console.log('🚀 Starting AI response generation...');
       const response = await generateCode(content);
       
       // Remove the thinking message
@@ -113,7 +140,7 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
       setCurrentThinkingStep('');
       
       if (response.error) {
-        addMessage("assistant", `I encountered an issue: ${response.error}. But I've created a professional application for you using my advanced capabilities!`);
+        addMessage("assistant", `I encountered an issue: ${response.error}. Let me try to help you anyway!`);
       }
       
       const { html = "", css = "", js = "" } = response.code || {};
@@ -125,15 +152,15 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
       }
       
       // Add the AI's response message
-      let responseMessage = response.explanation || "I've created your professional web application! Check the preview panel to see your modern, responsive application in action.";
+      let responseMessage = response.explanation || "I'm here to help! Feel free to ask me anything or request a web application.";
       
-      if (usingFreeAPI) {
+      if (usingFreeAPI && (html || css || js)) {
         responseMessage += "\n\n💡 Built with free Puter.js AI - professional results without API costs!";
       }
       
       addMessage("assistant", responseMessage);
       
-      // Success notification
+      // Success notification for code generation
       if (html || css || js) {
         toast.success("Professional Application Generated! 🎉", {
           description: "Your enterprise-grade web app is ready in the preview panel",
@@ -141,17 +168,17 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
         });
       }
     } catch (error) {
-      console.error("❌ Error generating code:", error);
+      console.error("❌ Error generating response:", error);
       
       // Remove the thinking message
       setMessages(prev => prev.filter(msg => msg.id !== thinkingId));
       setAiThinkingSteps([]);
       setCurrentThinkingStep('');
       
-      addMessage("assistant", "I encountered an issue, but I've generated a professional application for you using my built-in capabilities. You can refine it by describing what you'd like to change!");
+      addMessage("assistant", "I encountered an issue, but I'm still here to help! Please try rephrasing your question or request.");
       
-      toast.error("Generation Error", {
-        description: "Used fallback mode to create your professional app",
+      toast.error("Response Error", {
+        description: "Please try again with a different approach",
       });
     }
   };

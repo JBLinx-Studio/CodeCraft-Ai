@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { Info, Key, X, ZapIcon } from "lucide-react";
+import { Info, Key, X, ZapIcon, Brain, Sparkles } from "lucide-react";
 import { AIProvider } from "@/types";
 import { PERPLEXITY_MODELS } from "@/lib/ai-clients";
 import { FREE_API_KEY } from "@/lib/ai-clients/base-client";
@@ -39,8 +39,8 @@ interface AISettingsProps {
 export default function AISettings({
   apiKey,
   apiProvider,
-  modelType = "SMALL",
-  usingFreeAPI = false,
+  modelType = "gpt-4o-mini",
+  usingFreeAPI = true,
   onSave,
   onClear,
   onClose,
@@ -66,7 +66,7 @@ export default function AISettings({
       finalKey = FREE_API_KEY;
     }
 
-    const success = onSave(finalKey, provider, provider === "PERPLEXITY" ? selectedModel : undefined);
+    const success = onSave(finalKey, provider, provider === "PERPLEXITY" ? selectedModel : selectedModel);
     if (success) {
       toast({
         title: "Success",
@@ -82,7 +82,7 @@ export default function AISettings({
       setKey("");
       toast({
         title: "Success",
-        description: "API key removed",
+        description: "API key removed, switched to free mode",
       });
     }
   };
@@ -90,9 +90,10 @@ export default function AISettings({
   const handleSetFreeAPI = () => {
     if (onSetFreeAPI && onSetFreeAPI()) {
       setProvider("FREE");
+      setSelectedModel("gpt-4o-mini");
       toast({
-        title: "Free API Mode Enabled",
-        description: "Now using free API mode for testing purposes",
+        title: "Free Puter.js AI Enabled",
+        description: "Now using free GPT-4o mini via Puter.js",
       });
       onClose();
     }
@@ -103,9 +104,12 @@ export default function AISettings({
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>AI Settings</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-cyan-400" />
+              AI Settings
+            </CardTitle>
             <CardDescription>
-              Configure your AI service provider
+              Configure your AI service provider and model
             </CardDescription>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
@@ -113,23 +117,23 @@ export default function AISettings({
           </Button>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="rounded-md bg-amber-50 p-4 mb-6">
+          <div className="rounded-md bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 p-4 mb-6 border border-cyan-200 dark:border-cyan-800">
             <div className="flex">
               <div className="flex-shrink-0">
-                <ZapIcon className="h-5 w-5 text-amber-400" aria-hidden="true" />
+                <Sparkles className="h-5 w-5 text-cyan-500" aria-hidden="true" />
               </div>
               <div className="ml-3 flex-1">
-                <p className="text-sm text-amber-700">
+                <p className="text-sm text-cyan-700 dark:text-cyan-300">
                   <Button 
                     variant="link" 
-                    className="p-0 text-amber-700 font-semibold hover:text-amber-800"
+                    className="p-0 text-cyan-700 dark:text-cyan-300 font-semibold hover:text-cyan-800 dark:hover:text-cyan-200"
                     onClick={handleSetFreeAPI}
                   >
-                    Use Free API Mode for Testing
+                    🚀 Use Free Puter.js AI (Recommended)
                   </Button>
                 </p>
-                <p className="text-xs text-amber-600 mt-1">
-                  Free mode uses template generation for quick testing. For best results, use your own API key.
+                <p className="text-xs text-cyan-600 dark:text-cyan-400 mt-1">
+                  Free GPT-4o mini with cloud storage, auth, and database - no API key required!
                 </p>
               </div>
             </div>
@@ -140,30 +144,58 @@ export default function AISettings({
             <RadioGroup
               value={provider}
               onValueChange={(value) => setProvider(value as AIProvider)}
-              className="flex flex-col space-y-1"
+              className="flex flex-col space-y-3"
             >
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50">
                 <RadioGroupItem value="FREE" id="free" />
-                <Label htmlFor="free">Free Mode (Limited Testing)</Label>
+                <div className="flex-1">
+                  <Label htmlFor="free" className="font-medium">
+                    🆓 Puter.js AI (Free Forever)
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    GPT-4o mini + cloud storage + auth + database
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50">
                 <RadioGroupItem value="PERPLEXITY" id="perplexity" />
-                <Label htmlFor="perplexity">Perplexity AI (Recommended)</Label>
+                <div className="flex-1">
+                  <Label htmlFor="perplexity" className="font-medium">
+                    🧠 Perplexity AI (Recommended for Advanced)
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Llama 3.1 Sonar models with web search
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50">
                 <RadioGroupItem value="OPENAI" id="openai" />
-                <Label htmlFor="openai">OpenAI (GPT-3.5 Turbo)</Label>
+                <div className="flex-1">
+                  <Label htmlFor="openai" className="font-medium">
+                    🤖 OpenAI
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    GPT-3.5 Turbo
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50">
                 <RadioGroupItem value="HUGGINGFACE" id="huggingface" />
-                <Label htmlFor="huggingface">Hugging Face (Zephyr)</Label>
+                <div className="flex-1">
+                  <Label htmlFor="huggingface" className="font-medium">
+                    🤗 Hugging Face
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Zephyr 7B Beta
+                  </p>
+                </div>
               </div>
             </RadioGroup>
           </div>
 
           {provider === "PERPLEXITY" && (
             <div className="space-y-2">
-              <Label htmlFor="model-type">Model</Label>
+              <Label htmlFor="model-type">Perplexity Model</Label>
               <Select 
                 value={selectedModel} 
                 onValueChange={setSelectedModel}
@@ -172,13 +204,33 @@ export default function AISettings({
                   <SelectValue placeholder="Select a model" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="SMALL">Llama 3.1 Sonar Small (8B)</SelectItem>
-                  <SelectItem value="LARGE">Llama 3.1 Sonar Large (70B)</SelectItem>
-                  <SelectItem value="HUGE">Llama 3.1 Sonar Huge (405B)</SelectItem>
+                  <SelectItem value="SMALL">Llama 3.1 Sonar Small (8B) - Free</SelectItem>
+                  <SelectItem value="LARGE">Llama 3.1 Sonar Large (70B) - Paid</SelectItem>
+                  <SelectItem value="HUGE">Llama 3.1 Sonar Huge (405B) - Paid</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground mt-1">
-                Small is free, larger models may incur costs.
+                Small model is free, larger models may incur costs.
+              </p>
+            </div>
+          )}
+
+          {provider === "FREE" && (
+            <div className="space-y-2">
+              <Label htmlFor="free-model">Puter.js Model</Label>
+              <Select 
+                value={selectedModel} 
+                onValueChange={setSelectedModel}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gpt-4o-mini">GPT-4o Mini (Free)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Free GPT-4o mini with unlimited usage.
               </p>
             </div>
           )}
@@ -200,20 +252,20 @@ export default function AISettings({
           )}
 
           {provider !== "FREE" && (
-            <div className="rounded-md bg-blue-50 p-4">
+            <div className="rounded-md bg-blue-50 dark:bg-blue-900/20 p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
                   <Info className="h-5 w-5 text-blue-400" aria-hidden="true" />
                 </div>
                 <div className="ml-3 flex-1">
-                  <p className="text-sm text-blue-700">
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
                     Your API key is stored locally in your browser and never sent to our servers.
                     {provider === "OPENAI" ? (
                       <a
                         href="https://platform.openai.com/api-keys"
                         target="_blank"
                         rel="noreferrer"
-                        className="font-medium text-blue-700 underline hover:text-blue-600"
+                        className="font-medium text-blue-700 dark:text-blue-300 underline hover:text-blue-600 dark:hover:text-blue-200"
                       >
                         {" "}
                         Get an OpenAI API key
@@ -223,7 +275,7 @@ export default function AISettings({
                         href="https://huggingface.co/settings/tokens"
                         target="_blank"
                         rel="noreferrer"
-                        className="font-medium text-blue-700 underline hover:text-blue-600"
+                        className="font-medium text-blue-700 dark:text-blue-300 underline hover:text-blue-600 dark:hover:text-blue-200"
                       >
                         {" "}
                         Get a Hugging Face API key
@@ -233,7 +285,7 @@ export default function AISettings({
                         href="https://docs.perplexity.ai/docs/getting-started"
                         target="_blank"
                         rel="noreferrer"
-                        className="font-medium text-blue-700 underline hover:text-blue-600"
+                        className="font-medium text-blue-700 dark:text-blue-300 underline hover:text-blue-600 dark:hover:text-blue-200"
                       >
                         {" "}
                         Get a Perplexity API key
@@ -247,7 +299,7 @@ export default function AISettings({
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline" onClick={handleClear} disabled={!apiKey}>
-            Remove Key
+            Switch to Free Mode
           </Button>
           <Button onClick={handleSave}>Save Settings</Button>
         </CardFooter>

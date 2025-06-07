@@ -15,26 +15,48 @@ export class PuterClient extends BaseClient {
     try {
       const { prompt, chatHistory } = params;
       
-      console.log("🤖 Using Puter.js AI (GPT-4o mini) for professional code generation...");
+      console.log("🤖 Using Puter.js AI (GPT-4o mini)...");
       
-      // Create enhanced prompt for professional web development
-      const enhancedPrompt = this.createLovableStylePrompt(prompt, chatHistory);
+      // Check if this is a code generation request or just a chat
+      const isCodeRequest = this.isCodeGenerationRequest(prompt);
       
-      const response = await puterService.generateCode(enhancedPrompt, chatHistory);
-      
-      if (response.success && response.code) {
-        return {
-          success: true,
-          data: {
-            code: response.code,
-            explanation: response.explanation || "Generated professional web application with Puter.js AI"
-          }
-        };
+      if (isCodeRequest) {
+        console.log("🛠️ Detected code generation request");
+        const enhancedPrompt = this.createLovableStylePrompt(prompt, chatHistory);
+        const response = await puterService.generateCode(enhancedPrompt, chatHistory);
+        
+        if (response.success && response.code) {
+          return {
+            success: true,
+            data: {
+              code: response.code,
+              explanation: response.explanation || "Generated professional web application with Puter.js AI"
+            }
+          };
+        } else {
+          return {
+            success: false,
+            error: response.error || "Failed to generate code with Puter.js"
+          };
+        }
       } else {
-        return {
-          success: false,
-          error: response.error || "Failed to generate code with Puter.js"
-        };
+        console.log("💬 Detected chat request");
+        // For simple chat, use direct AI response
+        const response = await puterService.generateAIResponse(prompt, chatHistory);
+        
+        if (response.success && response.text) {
+          return {
+            success: true,
+            data: {
+              explanation: response.text
+            }
+          };
+        } else {
+          return {
+            success: false,
+            error: response.error || "Failed to get AI response"
+          };
+        }
       }
     } catch (error) {
       console.error("Puter AI error:", error);
@@ -43,6 +65,22 @@ export class PuterClient extends BaseClient {
         error: error instanceof Error ? error.message : "Unknown Puter AI error"
       };
     }
+  }
+
+  private isCodeGenerationRequest(prompt: string): boolean {
+    const codeKeywords = [
+      'create', 'build', 'make', 'generate', 'develop', 'design', 'website', 'app', 'application',
+      'page', 'component', 'form', 'button', 'landing', 'dashboard', 'portfolio', 'blog',
+      'ecommerce', 'todo', 'calculator', 'game', 'quiz', 'gallery', 'slider', 'navbar',
+      'footer', 'header', 'sidebar', 'modal', 'popup', 'dropdown', 'menu', 'chart',
+      'table', 'list', 'card', 'banner', 'hero', 'section', 'layout', 'responsive',
+      'mobile', 'desktop', 'css', 'html', 'javascript', 'react', 'vue', 'angular',
+      'bootstrap', 'tailwind', 'ui', 'ux', 'interface', 'frontend', 'backend',
+      'fullstack', 'web', 'site', 'platform', 'system', 'tool', 'widget'
+    ];
+
+    const lowerPrompt = prompt.toLowerCase();
+    return codeKeywords.some(keyword => lowerPrompt.includes(keyword));
   }
 
   createLovableStylePrompt(prompt: string, chatHistory?: Array<{ role: string; content: string }>): string {
