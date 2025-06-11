@@ -38,30 +38,6 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
     }
   }, [messages.length, usingFreeAPI, apiProvider]);
 
-  // Helper function to extract text from AI response
-  const extractTextFromResponse = (response: any): string => {
-    if (typeof response === 'string') {
-      return response;
-    }
-    
-    if (response && typeof response === 'object') {
-      // Handle Puter.js response format
-      if (response.message) {
-        return typeof response.message === 'string' ? response.message : JSON.stringify(response.message);
-      }
-      if (response.text) {
-        return response.text;
-      }
-      if (response.content) {
-        return response.content;
-      }
-      // Fallback
-      return JSON.stringify(response);
-    }
-    
-    return String(response);
-  };
-
   const addMessage = (role: "user" | "assistant", content: string) => {
     setMessages((prev) => [
       ...prev,
@@ -165,7 +141,6 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
       
       if (response.error) {
         addMessage("assistant", `I encountered an issue: ${response.error}. Let me try to help you anyway!`);
-        return;
       }
       
       const { html = "", css = "", js = "" } = response.code || {};
@@ -176,11 +151,8 @@ export const ChatPanel = ({ onCodeGenerated }: ChatPanelProps) => {
         console.log('✅ Code generated and preview updated');
       }
       
-      // Add the AI's response message - ensure we extract text properly
+      // Add the AI's response message
       let responseMessage = response.explanation || "I'm here to help! Feel free to ask me anything or request a web application.";
-      
-      // Ensure responseMessage is always a string
-      responseMessage = extractTextFromResponse(responseMessage);
       
       if (usingFreeAPI && (html || css || js)) {
         responseMessage += "\n\n💡 Built with free Puter.js AI - professional results without API costs!";
